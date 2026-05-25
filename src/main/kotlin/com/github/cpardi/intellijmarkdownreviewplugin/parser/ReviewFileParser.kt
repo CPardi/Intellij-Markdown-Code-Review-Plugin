@@ -109,8 +109,8 @@ object ReviewFileParser {
                 name = name,
                 virtualFile = virtualFile,
                 comments = comments,
-                preamble = preamble.toString(),
-                postamble = postamble.toString()
+                preamble = preamble.toString().trimEnd(),
+                postamble = postamble.toString().trimEnd()
             )
             
             LOG.info("Parsed ${comments.size} comments from review: $name")

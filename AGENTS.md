@@ -33,7 +33,6 @@
 
 - Do not consider breaking changes
 - Do not attempt to migrate data
-- Do not add tests
 
 ### Fields
 
@@ -51,3 +50,8 @@
 
 - Use inline comments sparingly and only to explain unobvious behaviour
 - Don't include comments describing specific to the current change. 
+
+### Testing
+
+- Do not test private definitions, only the public API should tested
+- If unit tests are becoming cumbersome, consider splitting definitions into smaller "units"
