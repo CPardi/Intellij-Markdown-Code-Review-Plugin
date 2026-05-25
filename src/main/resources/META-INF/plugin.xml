@@ -1,19 +1,77 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.cpardi.intellijmarkdownreviewplugin</id>
-    <name>Intellij-Markdown-Review-Plugin</name>
-    <vendor>cpardi</vendor>
+    <name>Markdown Review Generator</name>
+    <vendor>CPardi</vendor>
     <description><![CDATA[
-        <p><b>Intellij-Markdown-Review-Plugin</b> is a repository that provides a pure template to make it easier to create a new plugin project.</p>
-        <p>The main goal of this template is to speed up the setup phase of plugin development for both new and experienced developers by preconfiguring the project scaffold and CI, linking to the proper documentation pages, and keeping everything organized.</p>
+        <p><b>Review Markdown Generator</b> is a plugin that enables users to create code review comments in the IDE and generates a Markdown document for AI agents to process.</p>
+        <p>Features:</p>
+        <ul>
+            <li>Create and manage multiple review files</li>
+            <li>Add comments to specific code sections via gutter icons or context menu</li>
+            <li>Generate AI-friendly Markdown output for code reviews</li>
+            <li>Track file renames and moves automatically</li>
+        </ul>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.ReviewBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.cpardi.intellijmarkdownreviewplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.cpardi.intellijmarkdownreviewplugin.startup.MyProjectActivity" />
+        <!-- Application-level service for settings -->
+        <applicationService serviceImplementation="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettings"/>
+
+        <!-- Project-level service -->
+        <projectService serviceImplementation="com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService"/>
+
+        <!-- Application-level settings configurable -->
+        <applicationConfigurable parentId="tools"
+                                 instance="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettingsConfigurable"
+                                 id="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettingsConfigurable"
+                                 key="settings.displayName"
+                                 bundle="messages.ReviewBundle"/>
+
+        <!-- Tool window -->
+        <toolWindow id="Review Output"
+                    factoryClass="com.github.cpardi.intellijmarkdownreviewplugin.toolWindow.ReviewToolWindowFactory"
+                    anchor="right"
+                    icon="AllIcons.Toolwindows.ToolWindowInspection"/>
+
+        <!-- Startup activity -->
+        <postStartupActivity implementation="com.github.cpardi.intellijmarkdownreviewplugin.startup.ReviewStartupActivity"/>
+
+        <!-- Gutter icon line marker provider -->
+        <codeInsight.lineMarkerProvider implementationClass="com.github.cpardi.intellijmarkdownreviewplugin.markers.CommentLineMarkerProvider"
+                language=""/>
     </extensions>
+
+    <actions>
+        <group id="ReviewMarkdownGenerator.ReviewGroup" text="Review" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+
+            <action id="ReviewMarkdownGenerator.AddCommentContextMenu"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddCommentContextMenuAction"
+                    text="Add Comment"/>
+
+            <action id="ReviewMarkdownGenerator.AddOrEditComment"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddOrEditCommentAction"
+                    text="Add or Edit Comment">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl R"/>
+                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta R"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta R"/>
+            </action>
+
+            <action id="ReviewMarkdownGenerator.AddPageComment"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddPageCommentAction"
+                    text="Add Page Comment">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl shift R"/>
+                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta shift R"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta shift R"/>
+            </action>
+
+            <separator/>
+        </group>
+    </actions>
 </idea-plugin>

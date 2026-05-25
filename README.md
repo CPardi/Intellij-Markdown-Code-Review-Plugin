@@ -1,6 +1,6 @@
-# Intellij-Markdown-Review-Plugin
+# intellij-review-markdown-generator
 
-![Build](https://github.com/CPardi/Intellij-Markdown-Review-Plugin/workflows/Build/badge.svg)
+![Build](https://github.com//workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
@@ -22,7 +22,7 @@ This Fancy IntelliJ Platform Plugin is going to be your implementation of the br
 
 - Using the IDE built-in plugin system:
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "Intellij-Markdown-Review-Plugin"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "intellij-review-markdown-generator"</kbd> >
   <kbd>Install</kbd>
 
 - Using JetBrains Marketplace:
@@ -34,7 +34,7 @@ This Fancy IntelliJ Platform Plugin is going to be your implementation of the br
 
 - Manually:
 
-  Download the [latest release](https://github.com/CPardi/Intellij-Markdown-Review-Plugin/releases/latest) and install it manually using
+  Download the [latest release](https://github.com//releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 
