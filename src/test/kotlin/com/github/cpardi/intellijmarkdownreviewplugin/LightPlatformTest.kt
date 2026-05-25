@@ -2,12 +2,11 @@ package com.github.cpardi.intellijmarkdownreviewplugin
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -73,10 +72,12 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * @throws IOException if directory creation fails
      */
     @Throws(IOException::class)
-    protected fun createDirectory(relativePath: String) {
-        val projectDir = project.baseDir ?: throw IllegalStateException("Project has no base directory")
+    protected fun createDirectory(relativePath: String): VirtualFile {
+        val basePath = project.basePath ?: throw IllegalStateException("Project has no base directory")
+        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath))
+            ?: throw IllegalStateException("Project directory not found: $basePath")
 
-        return runWriteAction {
+        return runWriteAction<VirtualFile> {
             VfsUtil.createDirectories(projectDir.path + "/" + relativePath)
         }
     }
@@ -128,10 +129,12 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * @param relativePath The path relative to the project root
      */
     protected fun assertFileExists(relativePath: String) {
-        val projectDir = project.baseDir
-        assertNotNull(projectDir, "Project has no base directory")
+        val basePath = project.basePath
+        assertNotNull(basePath, "Project has no base directory")
+        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath!!))
+        assertNotNull(projectDir, "Project directory not found: $basePath")
 
-        val file = VfsUtil.findRelativeFile(projectDir, *relativePath.split("/").toTypedArray())
+        val file = VfsUtil.findRelativeFile(projectDir!!, *relativePath.split("/").toTypedArray())
         assertNotNull(file, "File should exist at path: $relativePath")
     }
 
@@ -141,10 +144,12 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * @param relativePath The path relative to the project root
      */
     protected fun assertFileNotExists(relativePath: String) {
-        val projectDir = project.baseDir
-        assertNotNull(projectDir, "Project has no base directory")
+        val basePath = project.basePath
+        assertNotNull(basePath, "Project has no base directory")
+        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath!!))
+        assertNotNull(projectDir, "Project directory not found: $basePath")
 
-        val file = VfsUtil.findRelativeFile(projectDir, *relativePath.split("/").toTypedArray())
+        val file = VfsUtil.findRelativeFile(projectDir!!, *relativePath.split("/").toTypedArray())
         assertNull(file, "File should not exist at path: $relativePath")
     }
 
@@ -155,10 +160,12 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * @param expectedContent The expected file content
      */
     protected fun assertFileContent(relativePath: String, expectedContent: String) {
-        val projectDir = project.baseDir
-        assertNotNull(projectDir, "Project has no base directory")
+        val basePath = project.basePath
+        assertNotNull(basePath, "Project has no base directory")
+        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath!!))
+        assertNotNull(projectDir, "Project directory not found: $basePath")
 
-        val file = VfsUtil.findRelativeFile(projectDir, *relativePath.split("/").toTypedArray())
+        val file = VfsUtil.findRelativeFile(projectDir!!, *relativePath.split("/").toTypedArray())
         assertNotNull(file, "File should exist at path: $relativePath")
 
         val actualContent = VfsUtil.loadText(file!!)
@@ -171,7 +178,11 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * Gets the base directory of the test project.
      */
     protected val projectBaseDir: VirtualFile
-        get() = project.baseDir ?: throw IllegalStateException("Project has no base directory")
+        get() {
+            val basePath = project.basePath ?: throw IllegalStateException("Project has no base directory")
+            return VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath))
+                ?: throw IllegalStateException("Project directory not found: $basePath")
+        }
 
     /**
      * Refreshes the virtual file system to pick up external changes.

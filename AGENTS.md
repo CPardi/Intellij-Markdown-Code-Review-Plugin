@@ -49,9 +49,15 @@
 ### Comments
 
 - Use inline comments sparingly and only to explain unobvious behaviour
-- Don't include comments describing specific to the current change. 
+- Don't include comments describing the specifics of the current change.
+- Do not add comments that repeat a definition's name and type.
+
+### Naming
+
+- Classes containing unit tests should have `Tests` postfix 
 
 ### Testing
 
-- Do not test private definitions, only the public API should tested
+- Do not test private definitions, only the public API should be tested
 - If unit tests are becoming cumbersome, consider splitting definitions into smaller "units"
+- If code covered by unit tests, then do not write smoke tests 

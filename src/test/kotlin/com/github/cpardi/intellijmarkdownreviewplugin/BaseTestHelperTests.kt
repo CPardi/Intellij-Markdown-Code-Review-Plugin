@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * Tests for BaseTestHelper utility methods.
  * Validates that test utilities work correctly before relying on them in other tests.
  */
-class BaseTestHelperTest {
+class BaseTestHelperTests {
 
     @Test
     fun `test createComment factory method`() {

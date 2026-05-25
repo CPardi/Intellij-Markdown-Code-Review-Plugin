@@ -28,16 +28,6 @@ data class Comment(
     fun isPageComment(): Boolean = startLine == 0 && endLine == 0
 
     /**
-     * Validates that the line range is valid.
-     * Page comments (0, 0) are valid. Line comments require positive startLine and endLine >= startLine.
-     * @return true if the range is valid
-     */
-    fun isValidRange(): Boolean {
-        if (isPageComment()) return true
-        return startLine in 1..endLine
-    }
-
-    /**
      * Returns a formatted string representation of the line range.
      * @return "startLine-endLine" or "startLine" if single line, empty string for page comments
      */
@@ -68,18 +58,6 @@ data class Comment(
      * @return true if the line is within the comment's range
      */
     fun containsLine(line: Int): Boolean = line in startLine..endLine
-
-    /**
-     * Checks if this comment overlaps with another comment's range on the same file.
-     * Page comments overlap with all comments on the same file.
-     * @param other The other comment to check against
-     * @return true if they overlap on the same file
-     */
-    fun overlaps(other: Comment): Boolean {
-        if (relativePath != other.relativePath) return false
-        if (isPageComment() || other.isPageComment()) return true
-        return startLine <= other.endLine && endLine >= other.startLine
-    }
 
     @get:Synchronized
     @set:Synchronized
