@@ -3,7 +3,6 @@ package com.github.cpardi.intellijmarkdownreviewplugin
 import com.github.cpardi.intellijmarkdownreviewplugin.services.Comment
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewFile
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.fail
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -164,24 +163,23 @@ object BaseTestHelper {
      * @param actual The actual comment
      * @param message Optional custom failure message prefix
      */
-    fun assertCommentEquals(
+    fun assertCommentContentEquals(
         expected: Comment?,
         actual: Comment?,
         message: String = ""
     ) {
         val prefix = if (message.isNotEmpty()) "$message: " else ""
-        
+
         if (expected == null && actual == null) return
-        
+
         if (expected == null) {
             fail { "${prefix}Expected null, but was: $actual" }
         }
-        
+
         if (actual == null) {
             fail { "${prefix}Expected: $expected, but was null" }
         }
-        
-        assertEquals(expected.id, actual.id, "${prefix}Comment ID mismatch")
+
         assertEquals(expected.relativePath, actual.relativePath, "${prefix}Comment relativePath mismatch")
         assertEquals(expected.startLine, actual.startLine, "${prefix}Comment startLine mismatch")
         assertEquals(expected.endLine, actual.endLine, "${prefix}Comment endLine mismatch")
@@ -195,17 +193,17 @@ object BaseTestHelper {
      * @param actual The actual list of comments
      * @param message Optional custom failure message prefix
      */
-    fun assertCommentListEquals(
+    fun assertCommentContentsListEquals(
         expected: List<Comment>,
         actual: List<Comment>,
         message: String = ""
     ) {
         val prefix = if (message.isNotEmpty()) "$message: " else ""
-        
+
         assertEquals(expected.size, actual.size, "${prefix}Comment list size mismatch")
-        
+
         for (i in expected.indices) {
-            assertCommentEquals(expected[i], actual[i], "${prefix}Comment at index $i")
+            assertCommentContentEquals(expected[i], actual[i], "${prefix}Comment at index $i")
         }
     }
 
@@ -223,7 +221,7 @@ object BaseTestHelper {
         message: String = ""
     ) {
         val prefix = if (message.isNotEmpty()) "$message: " else ""
-        
+
         if (expected == null && actual == null) return
 
         if (expected == null) {
@@ -233,11 +231,11 @@ object BaseTestHelper {
         if (actual == null) {
             fail { "${prefix}Expected: $expected, but was null" }
         }
-        
+
         assertEquals(expected.name, actual.name, "${prefix}ReviewFile name mismatch")
         assertEquals(expected.preamble, actual.preamble, "${prefix}ReviewFile preamble mismatch")
         assertEquals(expected.postamble, actual.postamble, "${prefix}ReviewFile postamble mismatch")
-        assertCommentListEquals(expected.comments.toList(), actual.comments.toList(), "${prefix}ReviewFile comments")
+        assertCommentContentsListEquals(expected.comments.toList(), actual.comments.toList(), "${prefix}ReviewFile comments")
     }
 
     // ==================== Test Resource Loading ====================
@@ -252,10 +250,10 @@ object BaseTestHelper {
     fun loadTestResource(path: String): String {
         val classLoader = BaseTestHelper::class.java.classLoader
         val resourcePath = if (path.startsWith("testData/")) path else "testData/$path"
-        
+
         val inputStream = classLoader.getResourceAsStream(resourcePath)
             ?: throw IllegalArgumentException("Test resource not found: $resourcePath")
-        
+
         return inputStream.bufferedReader().use { it.readText() }
     }
 
@@ -269,10 +267,10 @@ object BaseTestHelper {
     fun getTestResourcePath(path: String): String {
         val classLoader = BaseTestHelper::class.java.classLoader
         val resourcePath = if (path.startsWith("testData/")) path else "testData/$path"
-        
+
         val resourceUrl = classLoader.getResource(resourcePath)
             ?: throw IllegalArgumentException("Test resource not found: $resourcePath")
-        
+
         return resourceUrl.path
     }
 }

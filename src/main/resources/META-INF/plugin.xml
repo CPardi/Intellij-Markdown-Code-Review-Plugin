@@ -1,10 +1,10 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.cpardi.intellijmarkdownreviewplugin</id>
-    <name>Markdown Review Generator</name>
+    <name>Markdown Review Plugin</name>
     <vendor>CPardi</vendor>
     <description><![CDATA[
-        <p><b>Review Markdown Generator</b> is a plugin that enables users to create code review comments in the IDE and generates a Markdown document for AI agents to process.</p>
+        <p><b>Review Markdown Plugin</b> enables users to create code review comments in the IDE and generates a Markdown document for AI agents to process.</p>
         <p>Features:</p>
         <ul>
             <li>Create and manage multiple review files</li>

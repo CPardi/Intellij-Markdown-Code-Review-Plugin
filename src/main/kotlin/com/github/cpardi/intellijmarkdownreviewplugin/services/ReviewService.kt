@@ -56,8 +56,22 @@ class ReviewService(private val project: Project) {
      * @param name The review name, or null for <None>
      * @return CompletableFuture that completes when the review is loaded
      */
-    fun setActiveReview(name: String?): CompletableFuture<Void> {
-        if (name == null || name == NONE_SENTINEL) {
+    fun setActiveReview(name: String): CompletableFuture<Void> {
+        if (name == NONE_SENTINEL) {
+            return setActiveReview(null as ReviewFile?)
+        }
+
+        return setActiveReview(loadReview(name))
+    }
+
+    /**
+     * Sets the active review
+     * Pass null to select <None>.
+     * @param review The review, or null for <None>
+     * @return CompletableFuture that completes when the review is loaded
+     */
+    fun setActiveReview(review: ReviewFile?): CompletableFuture<Void> {
+        if (review == null) {
             synchronized(this) {
                 activeReview = null
             }
@@ -68,12 +82,12 @@ class ReviewService(private val project: Project) {
         }
 
         return CompletableFuture.supplyAsync {
-            loadReview(name)
+            review
         }.thenAccept { review ->
             synchronized(this) {
                 activeReview = review
             }
-            LOG.info("Set active review to: $name")
+            LOG.info("Set active review to: $review.name")
             attachRangeMarkersForOpenFiles()
             notifyReviewChanged()
             refreshOpenEditors()
@@ -129,7 +143,7 @@ class ReviewService(private val project: Project) {
         }
 
         val reviewFile = ReviewFile(name = name)
-        
+
         val resultFile = WriteAction.computeAndWait<VirtualFile?, Exception> {
             ReviewFileWriter.write(reviewFile, baseDir)
         }
@@ -152,7 +166,7 @@ class ReviewService(private val project: Project) {
      */
     fun deleteReview(name: String): Boolean {
         if (name == NONE_SENTINEL) return false
-        
+
         val baseDir = projectBaseDir ?: return false
         val reviewsDirName = ReviewSettings.getInstance().reviewsDir
         val reviewsDir = baseDir.findChild(reviewsDirName) ?: return false
@@ -213,13 +227,13 @@ class ReviewService(private val project: Project) {
         )
 
         review.comments.add(comment)
-        
+
         // Try to attach a RangeMarker if the file is open
         attachRangeMarker(comment)
 
         saveActiveReview()
         notifyCommentsChanged()
-        
+
         LOG.info("Added comment ${comment.id} to review ${review.name}")
         return comment
     }
@@ -243,12 +257,12 @@ class ReviewService(private val project: Project) {
         )
 
         review.comments.add(comment)
-        
+
         // Page comments don't need RangeMarkers
-        
+
         saveActiveReview()
         notifyCommentsChanged()
-        
+
         LOG.info("Added page comment ${comment.id} to review ${review.name}")
         return comment
     }
@@ -261,11 +275,11 @@ class ReviewService(private val project: Project) {
      */
     fun editComment(id: Int, newBody: String): Boolean {
         val comment = getCommentById(id) ?: return false
-        
+
         comment.body = newBody
         saveActiveReview()
         notifyCommentsChanged()
-        
+
         LOG.info("Updated comment $id")
         return true
     }
@@ -279,16 +293,16 @@ class ReviewService(private val project: Project) {
      */
     fun editCommentRange(id: Int, newStartLine: Int, newEndLine: Int): Boolean {
         val comment = getCommentById(id) ?: return false
-        
+
         comment.startLine = newStartLine
         comment.endLine = newEndLine
-        
+
         comment.rangeMarker = null
         attachRangeMarker(comment)
-        
+
         saveActiveReview()
         notifyCommentsChanged()
-        
+
         LOG.info("Updated comment $id range to $newStartLine-$newEndLine")
         return true
     }
@@ -300,7 +314,7 @@ class ReviewService(private val project: Project) {
      */
     fun deleteComment(id: Int): Boolean {
         val review = activeReview ?: return false
-        
+
         val removed = review.removeComment(id)
         if (removed) {
             saveActiveReview()
@@ -357,10 +371,10 @@ class ReviewService(private val project: Project) {
         try {
             val startOffset = document.getLineStartOffset(comment.startLine - 1)
             val endOffset = document.getLineEndOffset(comment.endLine - 1)
-            
+
             val marker = document.createRangeMarker(startOffset, endOffset, true)
             marker.isGreedyToRight = true
-            
+
             comment.rangeMarker = marker
         } catch (e: Exception) {
             LOG.warn("Failed to create RangeMarker for comment ${comment.id}: ${e.message}")
@@ -376,7 +390,7 @@ class ReviewService(private val project: Project) {
             val baseDir = projectBaseDir ?: return@runReadAction
             val file = VfsUtil.findRelativeFile(baseDir, *comment.relativePath.split("/").toTypedArray()) ?: return@runReadAction
             if (!file.isValid) return@runReadAction
-            
+
             val document = FileDocumentManager.getInstance().getDocument(file) ?: return@runReadAction
             attachRangeMarker(comment, document)
         }
@@ -395,7 +409,7 @@ class ReviewService(private val project: Project) {
         for (comment in comments) {
             // Skip page comments - they don't need RangeMarkers
             if (comment.isPageComment()) continue
-            
+
             if (comment.rangeMarker == null || !comment.rangeMarker!!.isValid) {
                 attachRangeMarker(comment, document)
             }
@@ -412,10 +426,10 @@ class ReviewService(private val project: Project) {
         runReadAction {
             val file = FileDocumentManager.getInstance().getFile(document) ?: return@runReadAction
             if (!file.isValid) return@runReadAction
-            
+
             val relativePath = getRelativePath(file)
             val comments = getCommentsForFile(relativePath)
-            
+
             for (comment in comments) {
                 val marker = comment.rangeMarker
                 if (marker != null && marker.isValid) {
@@ -440,15 +454,15 @@ class ReviewService(private val project: Project) {
     fun attachRangeMarkersForOpenFiles() {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val documentManager = FileDocumentManager.getInstance()
-        
+
         runReadAction {
             for (file in fileEditorManager.openFiles) {
                 if (!file.isValid) continue
-                
+
                 val relativePath = getRelativePath(file)
                 val comments = getCommentsForFile(relativePath)
                 if (comments.isEmpty()) continue
-                
+
                 val document = documentManager.getDocument(file) ?: continue
                 for (comment in comments) {
                     if (comment.rangeMarker == null || !comment.rangeMarker!!.isValid) {
@@ -479,11 +493,11 @@ class ReviewService(private val project: Project) {
     fun updateCommentsForFileRename(oldPath: String, newPath: String) {
         val comments = getCommentsForFile(oldPath)
         if (comments.isEmpty()) return
-        
+
         for (comment in comments) {
             comment.relativePath = newPath
         }
-        
+
         saveActiveReview()
         notifyCommentsChanged()
         LOG.info("Updated ${comments.size} comments from $oldPath to $newPath")

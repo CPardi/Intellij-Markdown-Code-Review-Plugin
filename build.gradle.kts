@@ -23,13 +23,23 @@ dependencies {
     intellijPlatform {
         intellijIdea("2025.3.4")
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.JUnit5)
+
     }
 }
 
 tasks {
     test {
-        useJUnitPlatform()
+        useJUnitPlatform {
+            // Exclude outer classes that extend BasePlatformTestCase (JUnit 3 TestCase)
+            // from the vintage engine. These classes use JUnit 5 @Nested inner classes
+            // for all tests, so the vintage engine incorrectly reports "No tests found"
+            // because it looks for JUnit 3-style test*() methods on the outer class.
+            excludeEngines("vintage")
+
+            // Exclude the outer classes themselves from vintage-style discovery.
+            // The @Nested inner classes are still discovered by the JUnit Jupiter engine.
+            excludeTags("junit3-outer")
+        }
 
         // Configure test logging
         testLogging {
