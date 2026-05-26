@@ -62,3 +62,4 @@
 - Do not test private definitions, only the public API should be tested
 - If unit tests are becoming cumbersome, consider splitting definitions into smaller "units"
 - If code covered by unit tests, then do not write smoke tests 
+- If private fields need to be queried or manipulated, then make them public. Do not use reflection. 
