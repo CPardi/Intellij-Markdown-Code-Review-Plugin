@@ -53,14 +53,6 @@ data class ReviewFile(
         comments.filter { it.relativePath == relativePath && it.isPageComment() }
 
     /**
-     * Checks if a file has any page comments.
-     * @param relativePath The relative file path to check
-     * @return true if the file has at least one page comment
-     */
-    fun hasPageComment(relativePath: String): Boolean =
-        comments.any { it.relativePath == relativePath && it.isPageComment() }
-
-    /**
      * Gets all comments that span a specific line in a file.
      * Note: Page comments are not included in results as they don't span specific lines.
      * @param relativePath The relative file path
