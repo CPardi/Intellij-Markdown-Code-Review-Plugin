@@ -2,6 +2,7 @@ package com.github.cpardi.intellijmarkdownreviewplugin
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -129,10 +130,8 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      * @param relativePath The path relative to the project root
      */
     protected fun assertFileExists(relativePath: String) {
-        val basePath = project.basePath
-        assertNotNull(basePath, "Project has no base directory")
-        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath!!))
-        assertNotNull(projectDir, "Project directory not found: $basePath")
+        val projectDir = project.guessProjectDir()
+        assertNotNull(projectDir, "Project directory not found: $projectDir")
 
         val file = VfsUtil.findRelativeFile(projectDir!!, *relativePath.split("/").toTypedArray())
         assertNotNull(file, "File should exist at path: $relativePath")

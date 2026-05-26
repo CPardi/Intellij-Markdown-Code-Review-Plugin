@@ -14,7 +14,7 @@ class BaseTestHelperTests {
     fun `test createComment factory method`() {
         // When: Creating a comment using the factory
         val comment = BaseTestHelper.createComment(1, "test.kt", 10, 20, "Test comment")
-        
+
         // Then: Should have all properties set correctly
         assertEquals(1, comment.id, "ID should match")
         assertEquals("test.kt", comment.relativePath, "Path should match")
@@ -27,7 +27,7 @@ class BaseTestHelperTests {
     fun `test createPageComment factory method`() {
         // When: Creating a page comment using the factory
         val comment = BaseTestHelper.createPageComment(1, "test.kt", "Page comment")
-        
+
         // Then: Should be a page comment with correct properties
         assertEquals(1, comment.id, "ID should match")
         assertEquals("test.kt", comment.relativePath, "Path should match")
@@ -45,7 +45,7 @@ class BaseTestHelperTests {
             BaseTestHelper.createComment(2, "b.kt", 10, 15, "Second")
         )
         val reviewFile = BaseTestHelper.createReviewFile("test-review", comments)
-        
+
         // Then: Should have correct properties
         assertEquals("test-review", reviewFile.name, "Name should match")
         assertEquals(2, reviewFile.size(), "Should have 2 comments")
@@ -56,7 +56,7 @@ class BaseTestHelperTests {
     fun `test createReviewFile empty`() {
         // When: Creating an empty review file
         val reviewFile = BaseTestHelper.createReviewFile("empty-review")
-        
+
         // Then: Should be empty
         assertEquals("empty-review", reviewFile.name, "Name should match")
         assertEquals(0, reviewFile.size(), "Should have 0 comments")
@@ -75,7 +75,7 @@ class BaseTestHelperTests {
             preamble = "# Header",
             postamble = "## Footer"
         )
-        
+
         // Then: Should preserve metadata
         assertEquals("test-review", reviewFile.name, "Name should match")
         assertEquals(1, reviewFile.size(), "Should have 1 comment")
@@ -87,10 +87,10 @@ class BaseTestHelperTests {
     fun `test buildReviewMarkdown single comment`() {
         // Given: A single comment
         val comment = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Test comment")
-        
+
         // When: Building Markdown
         val markdown = BaseTestHelper.buildReviewMarkdown(comment)
-        
+
         // Then: Should produce correct format
         val expected = "@[test.kt:1:5]:\nTest comment\n---"
         assertEquals(expected, markdown, "Should produce correct markdown")
@@ -101,10 +101,10 @@ class BaseTestHelperTests {
         // Given: Multiple comments
         val comment1 = BaseTestHelper.createComment(1, "a.kt", 1, 5, "First")
         val comment2 = BaseTestHelper.createComment(2, "b.kt", 10, 15, "Second")
-        
+
         // When: Building Markdown
         val markdown = BaseTestHelper.buildReviewMarkdown(comment1, comment2)
-        
+
         // Then: Should produce both comments with delimiters
         val expected = "@[a.kt:1:5]:\nFirst\n---\n@[b.kt:10:15]:\nSecond\n---"
         assertEquals(expected, markdown, "Should produce correct multi-comment markdown")
@@ -114,10 +114,10 @@ class BaseTestHelperTests {
     fun `test buildReviewMarkdown with preamble`() {
         // Given: A comment with preamble
         val comment = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Comment")
-        
+
         // When: Building Markdown with preamble
         val markdown = BaseTestHelper.buildReviewMarkdown(comment, preamble = "# Review\n\nProject X")
-        
+
         // Then: Should prepend preamble
         assertTrue(markdown.startsWith("# Review\n\nProject X\n\n@"), "Should start with preamble")
         assertTrue(markdown.contains("@[test.kt:1:5]:"), "Should contain comment header")
@@ -127,10 +127,10 @@ class BaseTestHelperTests {
     fun `test buildReviewMarkdown with postamble`() {
         // Given: A comment with postamble
         val comment = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Comment")
-        
+
         // When: Building Markdown with postamble
         val markdown = BaseTestHelper.buildReviewMarkdown(comment, postamble = "\n## Summary")
-        
+
         // Then: Should append postamble
         assertTrue(markdown.contains("Comment\n---"), "Should contain comment and delimiter")
         assertTrue(markdown.endsWith("\n## Summary"), "Should end with postamble")
@@ -140,10 +140,10 @@ class BaseTestHelperTests {
     fun `test buildReviewMarkdown page comment`() {
         // Given: A page comment
         val comment = BaseTestHelper.createPageComment(1, "test.kt", "Whole file comment")
-        
+
         // When: Building Markdown
         val markdown = BaseTestHelper.buildReviewMarkdown(comment)
-        
+
         // Then: Should produce page comment format
         val expected = "@[test.kt]:\nWhole file comment\n---"
         assertEquals(expected, markdown, "Should produce page comment markdown")
@@ -153,7 +153,7 @@ class BaseTestHelperTests {
     fun `test buildReviewMarkdown empty`() {
         // When: Building Markdown with no comments
         val markdown = BaseTestHelper.buildReviewMarkdown()
-        
+
         // Then: Should produce empty string
         assertEquals("", markdown, "Empty comments should produce empty markdown")
     }
@@ -163,17 +163,17 @@ class BaseTestHelperTests {
         // Given: Two identical comments
         val comment1 = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Comment")
         val comment2 = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Comment")
-        
+
         // When: Comparing them
         // Then: Should not throw exception
-        BaseTestHelper.assertCommentEquals(comment1, comment2, "Identical comments should be equal")
+        BaseTestHelper.assertCommentContentEquals(comment1, comment2, "Identical comments should be equal")
     }
 
     @Test
     fun `test assertCommentEquals both null`() {
         // When: Comparing two null comments
         // Then: Should not throw exception
-        BaseTestHelper.assertCommentEquals(null, null, "Two nulls should be considered equal")
+        BaseTestHelper.assertCommentContentEquals(null, null, "Two nulls should be considered equal")
     }
 
     @Test
@@ -187,10 +187,10 @@ class BaseTestHelperTests {
             BaseTestHelper.createComment(1, "a.kt", 1, 5, "First"),
             BaseTestHelper.createComment(2, "b.kt", 10, 15, "Second")
         )
-        
+
         // When: Comparing them
         // Then: Should not throw exception
-        BaseTestHelper.assertCommentListEquals(list1, list2, "Identical lists should be equal")
+        BaseTestHelper.assertCommentContentsListEquals(list1, list2, "Identical lists should be equal")
     }
 
     @Test
@@ -209,7 +209,7 @@ class BaseTestHelperTests {
             preamble = "# Header",
             postamble = "## Footer"
         )
-        
+
         // When: Comparing them
         // Then: Should not throw exception
         BaseTestHelper.assertReviewFileEquals(file1, file2, "Identical review files should be equal")

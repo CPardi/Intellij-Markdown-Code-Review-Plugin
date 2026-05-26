@@ -4,14 +4,12 @@ import com.github.cpardi.intellijmarkdownreviewplugin.BaseTestHelper
 import com.github.cpardi.intellijmarkdownreviewplugin.LightPlatformTest
 import com.github.cpardi.intellijmarkdownreviewplugin.parser.ReviewFileWriter
 import com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettings
+import com.intellij.openapi.application.readAction
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -406,8 +404,10 @@ class ReviewServiceIntegrationTests : LightPlatformTest() {
             // Given: A review with comments
             service.createNewReview()
             val review = service.activeReview!!
-            review.comments.add(BaseTestHelper.createComment(1, "src/Main.kt", 1, 5, "Main comment"))
-            review.comments.add(BaseTestHelper.createPageComment(2, "src/Utils.kt", "Utils page comment"))
+            val commentInMain = BaseTestHelper.createComment(1, "src/Main.kt", 1, 5, "Main comment")
+            val commentInUtils = BaseTestHelper.createPageComment(2, "src/Utils.kt", "Utils page comment")
+            review.comments.add(commentInMain)
+            review.comments.add(commentInUtils)
 
             // When: Saving and reloading
             service.saveActiveReview()
@@ -416,9 +416,8 @@ class ReviewServiceIntegrationTests : LightPlatformTest() {
             // Then: Comments should be preserved
             val reloaded = service.activeReview!!
             assertEquals(2, reloaded.size())
-            assertEquals("src/Main.kt", reloaded.getCommentById(1)!!.relativePath)
-            assertEquals("src/Utils.kt", reloaded.getCommentById(2)!!.relativePath)
-            assertTrue(reloaded.getCommentById(2)!!.isPageComment())
+            BaseTestHelper.assertCommentContentsListEquals(reloaded.getCommentsForFile("src/Main.kt"), listOf(commentInMain))
+            BaseTestHelper.assertCommentContentsListEquals(reloaded.getCommentsForFile("src/Utils.kt"), listOf(commentInUtils))
         }
     }
 
@@ -820,99 +819,111 @@ class ReviewServiceIntegrationTests : LightPlatformTest() {
     inner class RangeMarkerManagement {
 
         @Test
-        fun `test attachRangeMarker creates valid marker`() {
+        fun `test attachRangeMarker creates valid marker`() = runBlocking {
             // Given: A document with content and a comment
             val file = createVirtualFile("src/Main.kt", "line1\nline2\nline3\nline4\nline5\n")
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
-            val comment = BaseTestHelper.createComment(1, "src/Main.kt", 1, 3, "Comment")
+            runReadAction {
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
+                val comment = BaseTestHelper.createComment(1, "src/Main.kt", 1, 3, "Comment")
 
-            // When: Attaching a range marker
-            service.attachRangeMarker(comment, document)
+                // When: Attaching a range marker
+                service.attachRangeMarker(comment, document)
 
-            // Then: Marker should be created
-            assertNotNull(comment.rangeMarker)
-            assertTrue(comment.rangeMarker!!.isValid)
+                // Then: Marker should be created
+                assertNotNull(comment.rangeMarker)
+                assertTrue(comment.rangeMarker!!.isValid)
+            }
         }
 
         @Test
-        fun `test marker spans correct line range`() {
+        fun `test marker spans correct line range`() = runBlocking {
             // Given: A document with 10 lines
             val content = (1..10).joinToString("\n") { "line $it" }
             val file = createVirtualFile("src/Main.kt", content)
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
-            val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
 
-            // When: Attaching a range marker
-            service.attachRangeMarker(comment, document)
+            runReadAction {
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
+                val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
 
-            // Then: Marker should span lines 2-4
-            assertNotNull(comment.rangeMarker)
-            val marker = comment.rangeMarker!!
-            val startLine = document.getLineNumber(marker.startOffset) + 1
-            val endLine = document.getLineNumber(marker.endOffset) + 1
-            assertEquals(2, startLine)
-            assertEquals(4, endLine)
+                // When: Attaching a range marker
+                service.attachRangeMarker(comment, document)
+
+                // Then: Marker should span lines 2-4
+                assertNotNull(comment.rangeMarker)
+                val marker = comment.rangeMarker!!
+                val startLine = document.getLineNumber(marker.startOffset) + 1
+                val endLine = document.getLineNumber(marker.endOffset) + 1
+                assertEquals(2, startLine)
+                assertEquals(4, endLine)
+            }
         }
 
         @Test
-        fun `test marker isGreedyToRight is true`() {
+        fun `test marker isGreedyToRight is true`() = runBlocking {
             // Given: A document with content
             val file = createVirtualFile("src/Main.kt", "line1\nline2\n")
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
-            val comment = BaseTestHelper.createComment(1, "src/Main.kt", 1, 2, "Comment")
+            runReadAction {
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
+                val comment = BaseTestHelper.createComment(1, "src/Main.kt", 1, 2, "Comment")
 
-            // When: Attaching a range marker
-            service.attachRangeMarker(comment, document)
+                // When: Attaching a range marker
+                service.attachRangeMarker(comment, document)
 
-            // Then: Marker should be greedy to right
-            assertTrue(comment.rangeMarker!!.isGreedyToRight)
+                // Then: Marker should be greedy to right
+                assertTrue(comment.rangeMarker!!.isGreedyToRight)
+            }
         }
 
         @Test
-        fun `test page comments are skipped in updateRangeMarkersForFile`() {
+        fun `test page comments are skipped in updateRangeMarkersForFile`() = runBlocking {
             // Given: A review with page comments
             service.createNewReview()
             service.addPageComment("src/Main.kt", "Page comment")
 
             val file = createVirtualFile("src/Main.kt", "content\n")
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
+            runReadAction {
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
 
-            // When: Updating range markers for the file
-            service.updateRangeMarkersForFile("src/Main.kt", document)
+                // When: Updating range markers for the file
+                service.updateRangeMarkersForFile("src/Main.kt", document)
 
-            // Then: Page comments should not have markers
-            val pageComment = service.activeReview!!.getCommentById(1)!!
-            assertNull(pageComment.rangeMarker)
+                // Then: Page comments should not have markers
+                val pageComment = service.activeReview!!.getCommentById(1)!!
+                assertNull(pageComment.rangeMarker)
+            }
         }
 
         @Test
-        fun `test updateCommentLinesFromMarkers updates line numbers`() {
+        fun `test updateCommentLinesFromMarkers updates line numbers`() = runBlocking {
             // Given: A document with a range marker attached
             val content = (1..10).joinToString("\n") { "line $it" }
             val file = createVirtualFile("src/Main.kt", content)
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
+            runReadAction {
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
 
-            val review = BaseTestHelper.createReviewFile("test-review")
-            val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
-            review.comments.add(comment)
-            service.setActiveReview(review)
+                val review = BaseTestHelper.createReviewFile("test-review")
+                val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
+                review.comments.add(comment)
+                service.setActiveReview(review)
 
-            service.attachRangeMarker(comment, document)
+                service.attachRangeMarker(comment, document)
 
-            // When: Updating comment lines from markers
-            service.updateCommentLinesFromMarkers(document)
+                // When: Updating comment lines from markers
+                service.updateCommentLinesFromMarkers(document)
 
-            // Then: Lines should match marker positions
-            val updated = service.getCommentById(1)!!
-            assertEquals(2, updated.startLine)
-            assertEquals(4, updated.endLine)
+                // Then: Lines should match marker positions
+                val updated = service.getCommentById(1)!!
+                assertEquals(2, updated.startLine)
+                assertEquals(4, updated.endLine)
+            }
         }
 
         @Test
-        fun `test invalid markers are cleared`() {
+        fun `test invalid markers are cleared`() = runBlocking {
             // Given: A review with an attached marker
             val content = (1..10).joinToString("\n") { "line $it" }
             val file = createVirtualFile("src/Main.kt", content)
+            readAction {
             val document = FileDocumentManager.getInstance().getDocument(file)!!
 
             val review = BaseTestHelper.createReviewFile("test-review")
@@ -930,6 +941,7 @@ class ReviewServiceIntegrationTests : LightPlatformTest() {
 
             // Then: Marker should be cleared
             assertNull(comment.rangeMarker)
+                }
         }
     }
 

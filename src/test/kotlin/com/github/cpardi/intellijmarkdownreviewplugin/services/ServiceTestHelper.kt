@@ -14,22 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 object ServiceTestHelper {
 
-    // ==================== Active Review Factory ====================
-
-    /**
-     * Creates a ReviewFile with the specified comments and sets it as the active review.
-     * Requires the activeReview setter to be public.
-     */
-    fun setActiveReviewWithComments(
-        service: ReviewService,
-        name: String = "test-review",
-        comments: List<Comment> = emptyList()
-    ): ReviewFile {
-        val review = BaseTestHelper.createReviewFile(name, comments)
-        service.activeReview = review
-        return review
-    }
-
     // ==================== CreateReviewResult Assertions ====================
 
     /**
@@ -67,7 +51,7 @@ object ServiceTestHelper {
         val parsed = ReviewFileParser.parse(file)
             ?: throw AssertionError("Failed to parse review file: $name.md")
 
-        BaseTestHelper.assertCommentListEquals(
+        BaseTestHelper.assertCommentContentsListEquals(
             expectedComments,
             parsed.comments.toList(),
             "Review file content mismatch"
