@@ -4,7 +4,6 @@ import com.github.cpardi.intellijmarkdownreviewplugin.BaseTestHelper
 import com.github.cpardi.intellijmarkdownreviewplugin.UnitTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,7 +13,7 @@ import org.junit.jupiter.api.Test
  * Tests all serialization scenarios including line comments, page comments,
  * delimiter validation, preamble/postamble handling, sorting, and edge cases.
  */
-class ReviewFileWriterTest : UnitTest() {
+class ReviewFileWriterTests : UnitTest() {
 
     // ==================== Line Comment Serialization Tests ====================
 

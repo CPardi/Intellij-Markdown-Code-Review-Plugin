@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
  * Tests that parse(write(x)) == x for all valid inputs,
  * ensuring the parser and writer work together seamlessly.
  */
-class ParserWriterRoundTripTest : UnitTest() {
+class ParserWriterRoundTripTests : UnitTest() {
 
     // ==================== Helper Methods ====================
 

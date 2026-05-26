@@ -5,7 +5,6 @@ import com.github.cpardi.intellijmarkdownreviewplugin.UnitTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test
  * Tests all parsing scenarios including line comments, page comments,
  * preamble/postamble handling, malformed input, and edge cases.
  */
-class ReviewFileParserTest : UnitTest() {
+class ReviewFileParserTests : UnitTest() {
 
     // ==================== Line Comment Parsing Tests ====================
 

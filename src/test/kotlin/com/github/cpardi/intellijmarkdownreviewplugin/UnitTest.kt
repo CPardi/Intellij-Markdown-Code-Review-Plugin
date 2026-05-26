@@ -27,7 +27,7 @@ abstract class UnitTest {
     @BeforeEach
     open fun setUp() {
         // Default implementation does nothing
-        // Subclasses can override to provide setup logic
+        // Sub-classes can override to provide setup logic
     }
 
     /**
@@ -37,6 +37,6 @@ abstract class UnitTest {
     @AfterEach
     open fun tearDown() {
         // Default implementation does nothing
-        // Subclasses can override to provide cleanup logic
+        // Sub-classes can override to provide cleanup logic
     }
 }

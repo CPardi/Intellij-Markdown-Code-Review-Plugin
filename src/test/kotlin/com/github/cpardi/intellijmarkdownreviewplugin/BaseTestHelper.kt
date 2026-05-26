@@ -4,6 +4,7 @@ import com.github.cpardi.intellijmarkdownreviewplugin.services.Comment
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.fail
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -111,12 +112,12 @@ object BaseTestHelper {
     // ==================== Markdown Content Builders ====================
 
     /**
-     * Builds a markdown review file content string from comments.
+     * Builds a Markdown review file content string from comments.
      *
      * @param comments Variable number of comments to include
      * @param preamble Optional text before first header
      * @param postamble Optional text after last delimiter
-     * @return A formatted markdown string
+     * @return A formatted Markdown string
      */
     fun buildReviewMarkdown(
         vararg comments: Comment,
@@ -173,13 +174,11 @@ object BaseTestHelper {
         if (expected == null && actual == null) return
         
         if (expected == null) {
-            assertFalse(actual == null, "${prefix}Expected null, but was: $actual")
-            return
+            fail { "${prefix}Expected null, but was: $actual" }
         }
         
         if (actual == null) {
-            assertFalse(true, "${prefix}Expected: $expected, but was null")
-            return
+            fail { "${prefix}Expected: $expected, but was null" }
         }
         
         assertEquals(expected.id, actual.id, "${prefix}Comment ID mismatch")
@@ -226,15 +225,13 @@ object BaseTestHelper {
         val prefix = if (message.isNotEmpty()) "$message: " else ""
         
         if (expected == null && actual == null) return
-        
+
         if (expected == null) {
-            assertFalse(actual == null, "${prefix}Expected null, but was: $actual")
-            return
+            fail { "${prefix}Expected null, but was: $actual" }
         }
-        
+
         if (actual == null) {
-            assertFalse(true, "${prefix}Expected: $expected, but was null")
-            return
+            fail { "${prefix}Expected: $expected, but was null" }
         }
         
         assertEquals(expected.name, actual.name, "${prefix}ReviewFile name mismatch")
