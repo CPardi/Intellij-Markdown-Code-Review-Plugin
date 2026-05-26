@@ -56,8 +56,22 @@ class ReviewService(private val project: Project) {
      * @param name The review name, or null for <None>
      * @return CompletableFuture that completes when the review is loaded
      */
-    fun setActiveReview(name: String?): CompletableFuture<Void> {
-        if (name == null || name == NONE_SENTINEL) {
+    fun setActiveReview(name: String): CompletableFuture<Void> {
+        if (name == NONE_SENTINEL) {
+            return setActiveReview(null as ReviewFile?)
+        }
+
+        return setActiveReview(loadReview(name))
+    }
+
+    /**
+     * Sets the active review
+     * Pass null to select <None>.
+     * @param review The review, or null for <None>
+     * @return CompletableFuture that completes when the review is loaded
+     */
+    fun setActiveReview(review: ReviewFile?): CompletableFuture<Void> {
+        if (review == null) {
             synchronized(this) {
                 activeReview = null
             }
@@ -68,12 +82,12 @@ class ReviewService(private val project: Project) {
         }
 
         return CompletableFuture.supplyAsync {
-            loadReview(name)
+            review
         }.thenAccept { review ->
             synchronized(this) {
                 activeReview = review
             }
-            LOG.info("Set active review to: $name")
+            LOG.info("Set active review to: $review.name")
             attachRangeMarkersForOpenFiles()
             notifyReviewChanged()
             refreshOpenEditors()
