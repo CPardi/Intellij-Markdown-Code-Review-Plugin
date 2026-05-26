@@ -33,7 +33,7 @@ class ReviewServiceIntegrationTests : LightPlatformTest() {
 
     private fun setupReviewsDirectory(): Document {
         createDirectory("reviews")
-        return createVirtualFile("reviews/.keep", "")!!.parent
+        return createVirtualFile("reviews/.keep", "").parent
             .let { FileDocumentManager.getInstance().getDocument(it)!! }
     }
 

@@ -13,8 +13,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 
     // JUnit 4 - Required workaround for IJPL-159134 (JUnit5 Test Framework refers to JUnit4)
-    testImplementation("junit:junit:4.13.2")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
+    testRuntimeOnly("junit:junit:4.13.2")
 
     // Required for JUnit 5 assertions - fix for IJPL-157292 (Missing opentest4j dependency)
     testImplementation("org.opentest4j:opentest4j:1.3.0")

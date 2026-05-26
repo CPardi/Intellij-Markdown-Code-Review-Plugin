@@ -24,6 +24,9 @@ class ReviewSettingsTests : LightPlatformTest() {
         settings.reviewsDir = "reviews"
     }
 
+    @Test
+    fun `Suppress no tests warning`() {}
+
     @Nested
     inner class DefaultValues {
 
