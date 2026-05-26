@@ -11,13 +11,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 /**
- * Comprehensive unit tests for ReviewFile data model.
- * Tests all query methods, mutation operations, ID generation,
- * preamble/postamble handling, and edge cases.
+ * Tests all query methods, mutation operations, ID generation, preamble/postamble handling, and edge cases.
  */
 class ReviewFileTests : UnitTest() {
-
-    // ==================== isEmpty Tests ====================
 
     @Nested
     inner class IsEmpty {
@@ -60,8 +56,6 @@ class ReviewFileTests : UnitTest() {
             assertFalse(isEmpty, "Review with page comments should not be empty")
         }
     }
-
-    // ==================== size Tests ====================
 
     @Nested
     inner class Size {
@@ -125,8 +119,6 @@ class ReviewFileTests : UnitTest() {
         }
     }
 
-    // ==================== getCommentById Tests ====================
-
     @Nested
     inner class GetCommentById {
 
@@ -185,8 +177,6 @@ class ReviewFileTests : UnitTest() {
             assertTrue(found!!.isPageComment(), "Found comment should be a page comment")
         }
     }
-
-    // ==================== getCommentsForFile Tests ====================
 
     @Nested
     inner class GetCommentsForFile {
@@ -268,8 +258,6 @@ class ReviewFileTests : UnitTest() {
         }
     }
 
-    // ==================== getPageCommentsForFile Tests ====================
-
     @Nested
     inner class GetPageCommentsForFile {
 
@@ -336,8 +324,6 @@ class ReviewFileTests : UnitTest() {
             assertTrue(pageComments.isEmpty(), "Empty review should return empty list")
         }
     }
-
-    // ==================== getCommentsForLine Tests ====================
 
     @Nested
     inner class GetCommentsForLine {
@@ -477,8 +463,6 @@ class ReviewFileTests : UnitTest() {
         }
     }
 
-    // ==================== removeComment Tests ====================
-
     @Nested
     inner class RemoveComment {
 
@@ -572,8 +556,6 @@ class ReviewFileTests : UnitTest() {
             assertTrue(reviewFile.isEmpty(), "Review should be empty after removing only comment")
         }
     }
-
-    // ==================== nextId Tests ====================
 
     @Nested
     inner class NextId {
@@ -670,8 +652,6 @@ class ReviewFileTests : UnitTest() {
         }
     }
 
-    // ==================== Preamble and Postamble Tests ====================
-
     @Nested
     inner class PreambleAndPostamble {
 
@@ -751,8 +731,6 @@ class ReviewFileTests : UnitTest() {
             assertEquals("New footer", reviewFile.postamble, "Postamble should be mutable")
         }
     }
-
-    // ==================== Data Class Properties Tests ====================
 
     @Nested
     inner class DataClassProperties {

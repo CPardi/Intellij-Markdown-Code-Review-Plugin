@@ -51,6 +51,7 @@
 - Use inline comments sparingly and only to explain unobvious behaviour
 - Don't include comments describing the specifics of the current change.
 - Do not add comments that repeat a definition's name and type.
+- Do not add banner or suite comments above classes
 
 ### Naming
 

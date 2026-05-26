@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 /**
- * Comprehensive unit tests for CreateReviewResult sealed class.
  * Tests Success/Failure variants, property access, and exhaustiveness checking.
  *
  * Note: Tests for getOrShowError() method are not included because:
@@ -16,8 +15,6 @@ import org.junit.jupiter.api.Test
  * - These tests will be added in the integration test phase
  */
 class CreateReviewResultTests : UnitTest() {
-
-    // ==================== Success Variant Tests ====================
 
     @Nested
     inner class SuccessVariant {
@@ -84,8 +81,6 @@ class CreateReviewResultTests : UnitTest() {
             assertEquals(result.name, name, "Destructured name should match property")
         }
     }
-
-    // ==================== Failure Variant Tests ====================
 
     @Nested
     inner class FailureVariant {
@@ -158,8 +153,6 @@ class CreateReviewResultTests : UnitTest() {
             assertEquals(result.message, message, "Destructured message should match property")
         }
     }
-
-    // ==================== Sealed Class Exhaustiveness Tests ====================
 
     @Nested
     inner class SealedClassExhaustiveness {
@@ -247,8 +240,6 @@ class CreateReviewResultTests : UnitTest() {
             assertEquals("Created: review", output, "When expression should handle all variants")
         }
     }
-
-    // ==================== Edge Cases Tests ====================
 
     @Nested
     inner class EdgeCases {
