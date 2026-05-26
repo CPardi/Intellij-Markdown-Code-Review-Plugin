@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 /**
- * Round-trip integration tests for parser and writer.
- * Tests that parse(write(x)) == x for all valid inputs,
- * ensuring the parser and writer work together seamlessly.
+ * Tests that parse(write(x)) == x for all valid inputs
  */
 class ParserWriterRoundTripTests : UnitTest() {
 

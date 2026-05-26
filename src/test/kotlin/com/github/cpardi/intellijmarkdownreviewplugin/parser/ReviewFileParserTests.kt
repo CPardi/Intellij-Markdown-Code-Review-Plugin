@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 /**
- * Comprehensive unit tests for ReviewFileParser.
  * Tests all parsing scenarios including line comments, page comments,
  * preamble/postamble handling, malformed input, and edge cases.
  */
