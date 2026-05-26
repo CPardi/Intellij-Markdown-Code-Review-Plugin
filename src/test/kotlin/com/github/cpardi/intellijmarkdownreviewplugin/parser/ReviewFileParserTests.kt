@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test
  */
 class ReviewFileParserTests : UnitTest() {
 
-    // ==================== Line Comment Parsing Tests ====================
-
     @Nested
     inner class LineCommentParsing {
 
@@ -47,7 +45,7 @@ class ReviewFileParserTests : UnitTest() {
             
             // When: Parsing the content
             val reviewFile = ReviewFileParser.parseContent("test", content)
-            
+
             // Then: Should preserve the range
             assertNotNull(reviewFile)
             val comment = reviewFile!!.comments.first()
@@ -169,8 +167,6 @@ class ReviewFileParserTests : UnitTest() {
         }
     }
 
-    // ==================== Page Comment Parsing Tests ====================
-
     @Nested
     inner class PageCommentParsing {
 
@@ -251,8 +247,6 @@ class ReviewFileParserTests : UnitTest() {
         }
     }
 
-    // ==================== Preamble and Postamble Tests ====================
-
     @Nested
     inner class PreamblePostamble {
 
@@ -322,8 +316,6 @@ class ReviewFileParserTests : UnitTest() {
             assertEquals("", reviewFile!!.postamble)
         }
     }
-
-    // ==================== Multi-Comment Parsing Tests ====================
 
     @Nested
     inner class MultiCommentParsing {
@@ -433,8 +425,6 @@ class ReviewFileParserTests : UnitTest() {
         }
     }
 
-    // ==================== Malformed Input Handling Tests ====================
-
     @Nested
     inner class MalformedInputHandling {
 
@@ -531,8 +521,6 @@ class ReviewFileParserTests : UnitTest() {
             assertEquals(0, reviewFile!!.size())
         }
     }
-
-    // ==================== Edge Case Tests ====================
 
     @Nested
     inner class EdgeCases {
@@ -634,8 +622,6 @@ class ReviewFileParserTests : UnitTest() {
             assertEquals(2, reviewFile!!.size())
         }
     }
-
-    // ==================== Test Data File Tests ====================
 
     @Nested
     inner class TestDataFiles {

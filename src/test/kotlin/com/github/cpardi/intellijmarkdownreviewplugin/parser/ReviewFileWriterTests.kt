@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test
  */
 class ReviewFileWriterTests : UnitTest() {
 
-    // ==================== Line Comment Serialization Tests ====================
-
     @Nested
     inner class LineCommentSerialization {
 
@@ -107,8 +105,6 @@ class ReviewFileWriterTests : UnitTest() {
         }
     }
 
-    // ==================== Page Comment Serialization Tests ====================
-
     @Nested
     inner class PageCommentSerialization {
 
@@ -167,8 +163,6 @@ class ReviewFileWriterTests : UnitTest() {
             assertFalse(content.contains(":0:0"))
         }
     }
-
-    // ==================== Delimiter Validation Tests ====================
 
     @Nested
     inner class DelimiterValidation {
@@ -235,8 +229,6 @@ class ReviewFileWriterTests : UnitTest() {
             assertEquals("---", ReviewFileWriter.DELIMITER)
         }
     }
-
-    // ==================== Preamble and Postamble Writing Tests ====================
 
     @Nested
     inner class PreamblePostambleWriting {
@@ -376,8 +368,6 @@ class ReviewFileWriterTests : UnitTest() {
         }
     }
 
-    // ==================== Comment Sorting Tests ====================
-
     @Nested
     inner class CommentSorting {
 
@@ -489,8 +479,6 @@ class ReviewFileWriterTests : UnitTest() {
         }
     }
 
-    // ==================== Empty and Edge Case Tests ====================
-
     @Nested
     inner class EmptyAndEdgeCases {
 
@@ -583,8 +571,6 @@ class ReviewFileWriterTests : UnitTest() {
             assertEquals(expected, content)
         }
     }
-
-    // ==================== Special Character Tests ====================
 
     @Nested
     inner class SpecialCharacters {
