@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.vfs.VirtualFile
 import com.github.cpardi.intellijmarkdownreviewplugin.services.Comment
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewFile
+import com.intellij.openapi.application.runReadAction
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -13,21 +14,21 @@ import java.util.concurrent.CopyOnWriteArrayList
 object ReviewFileParser {
 
     private val LOG = thisLogger()
-    
+
     // Header pattern for line comments: @[<relative-path>:<start-line>:<end-line>]:
     private val HEADER_REGEX = Regex("""^@\[(.+):(\d+):(\d+)\]:""")
-    
+
     // Header pattern for page comments: @[<relative-path>]:
     private val PAGE_HEADER_REGEX = Regex("""^@\[(.+)\]:""")
-    
+
     /**
      * Parses a review file from a VirtualFile.
      *
      * @param virtualFile The virtual file to parse
      * @return A ReviewFile object, or null if parsing fails
      */
-    fun parse(virtualFile: VirtualFile): ReviewFile? {
-        return try {
+    fun parse(virtualFile: VirtualFile): ReviewFile? = runReadAction {
+        try {
             val content = virtualFile.inputStream.bufferedReader().use { it.readText() }
             val name = virtualFile.nameWithoutExtension
             parseContent(name, content, virtualFile)
@@ -51,10 +52,10 @@ object ReviewFileParser {
             val comments = CopyOnWriteArrayList<Comment>()
             val preamble = StringBuilder()
             val postamble = StringBuilder()
-            
+
             var currentLineIndex = 0
             var foundFirstHeader = false
-            
+
             // Extract preamble (text before first header)
             while (currentLineIndex < lines.size) {
                 val line = lines[currentLineIndex]
@@ -68,12 +69,12 @@ object ReviewFileParser {
                 preamble.append(line)
                 currentLineIndex++
             }
-            
+
             // Parse comments
             var nextId = 1
             while (currentLineIndex < lines.size) {
                 val line = lines[currentLineIndex]
-                
+
                 // Try line comment header first (more specific)
                 val lineHeaderMatch = HEADER_REGEX.matchEntire(line)
                 if (lineHeaderMatch != null) {
@@ -84,7 +85,7 @@ object ReviewFileParser {
                     nextId++
                     continue
                 }
-                
+
                 // Try page comment header
                 val pageHeaderMatch = PAGE_HEADER_REGEX.matchEntire(line)
                 if (pageHeaderMatch != null) {
@@ -95,7 +96,7 @@ object ReviewFileParser {
                     nextId++
                     continue
                 }
-                
+
                 if (line == "---") {
                     // Skip standalone delimiters
                     currentLineIndex++
@@ -104,7 +105,7 @@ object ReviewFileParser {
                     currentLineIndex++
                 }
             }
-            
+
             val reviewFile = ReviewFile(
                 name = name,
                 virtualFile = virtualFile,
@@ -112,7 +113,7 @@ object ReviewFileParser {
                 preamble = preamble.toString().trimEnd(),
                 postamble = postamble.toString().trimEnd()
             )
-            
+
             LOG.info("Parsed ${comments.size} comments from review: $name")
             reviewFile
         } catch (e: Exception) {
@@ -134,28 +135,28 @@ object ReviewFileParser {
     ): Pair<List<String>, Int> {
         val bodyLines = mutableListOf<String>()
         var currentIndex = startIndex
-        
+
         while (currentIndex < lines.size) {
             val line = lines[currentIndex]
-            
+
             // Stop at delimiter
             if (line == "---") {
                 currentIndex++ // Consume the delimiter
                 break
             }
-            
+
             // Stop at next header (means previous comment had no delimiter - malformed but handle gracefully)
             if (HEADER_REGEX.matches(line) || PAGE_HEADER_REGEX.matches(line)) {
                 break
             }
-            
+
             bodyLines.add(line)
             currentIndex++
         }
-        
+
         return Pair(bodyLines, currentIndex)
     }
-    
+
     /**
      * Parses a line comment starting from the body.
      *
@@ -188,7 +189,7 @@ object ReviewFileParser {
             nextIndex
         )
     }
-    
+
     /**
      * Parses a page comment starting from the body.
      *

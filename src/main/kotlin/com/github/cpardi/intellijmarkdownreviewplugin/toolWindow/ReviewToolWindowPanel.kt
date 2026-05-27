@@ -132,7 +132,7 @@ class ReviewToolWindowPanel(private val project: Project) : JBPanel<ReviewToolWi
             // Select the active review
             val activeName = service.activeReview?.name ?: ReviewService.NONE_SENTINEL
             reviewComboBox.selectedItem = activeName
-            
+
             // Update delete button state based on active review
             updateDeleteButtonState()
         } finally {
@@ -198,7 +198,6 @@ class ReviewToolWindowPanel(private val project: Project) : JBPanel<ReviewToolWi
                 lineWrap = true
                 wrapStyleWord = true
                 border = JBUI.Borders.empty(5)
-                background = CommentBubblePanel.getBubbleBackground()
             }
 
             // Wrap in panel with minimum height and border
@@ -229,6 +228,7 @@ class ReviewToolWindowPanel(private val project: Project) : JBPanel<ReviewToolWi
             val deleteButton = JButton("Delete").apply {
                 toolTipText = "Delete comment"
                 addActionListener { onDeleteComment(comment.id) }
+                background = defaultBorderColor
                 isOpaque = false
             }
 
@@ -292,10 +292,10 @@ class ReviewToolWindowPanel(private val project: Project) : JBPanel<ReviewToolWi
 
     private fun onReviewSelected() {
         if (isUpdatingSelection) return
-        
+
         val selectedName = reviewComboBox.selectedItem as? String ?: return
         if (selectedName == (service.activeReview?.name ?: ReviewService.NONE_SENTINEL)) return
-        
+
         service.setActiveReview(selectedName)
         updateDeleteButtonState()
     }
