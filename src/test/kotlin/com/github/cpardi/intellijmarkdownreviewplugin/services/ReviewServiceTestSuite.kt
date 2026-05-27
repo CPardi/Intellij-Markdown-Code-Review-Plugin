@@ -7,28 +7,27 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-/**
- * Integration tests for ReviewService using IntelliJ Platform components.
- * Tests file operations, CRUD with persistence, RangeMarker management,
- * path utilities, and message bus notifications.
- */
-@Suppress("JUnitMixedFramework")
-abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
+object ReviewServiceTestSuite {
 
-    private lateinit var service: ReviewService
+    /**
+     * Base class for integration tests of ReviewService.
+     */
+    abstract class ReviewServiceTest : LightPlatformTest() {
 
-    override fun setUp() {
-        super.setUp()
-        service = ReviewService.getInstance(project)
-        service.setActiveReview(null)
+        protected lateinit var service: ReviewService
+
+        override fun setUp() {
+            super.setUp()
+            service = ReviewService.getInstance(project)
+            service.setActiveReview(null)
+        }
     }
 
-    @Nested
-    inner class GetAvailableReviewNames : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class GetAvailableReviewNames : ReviewServiceTest() {
 
         @Test
         fun `test returns empty list when reviews directory does not exist`() {
@@ -96,8 +95,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class CreateNewReview : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class CreateNewReview : ReviewServiceTest() {
 
         @Test
         fun `test creates file with generated name in reviews directory`() {
@@ -174,8 +173,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class DeleteReview : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class DeleteReview : ReviewServiceTest() {
 
         @Test
         fun `test deletes existing review file from disk`() {
@@ -256,8 +255,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class SetActiveReview : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class SetActiveReview : ReviewServiceTest() {
 
         @Test
         fun `test null clears active review`() {
@@ -338,8 +337,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class SaveActiveReview : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class SaveActiveReview : ReviewServiceTest() {
 
         @Test
         fun `test saves active review to disk`() {
@@ -385,13 +384,19 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
             // Then: Comments should be preserved
             val reloaded = service.activeReview!!
             assertEquals(2, reloaded.size())
-            BaseTestHelper.assertCommentContentsListEquals(reloaded.getCommentsForFile("src/Main.kt"), listOf(commentInMain))
-            BaseTestHelper.assertCommentContentsListEquals(reloaded.getCommentsForFile("src/Utils.kt"), listOf(commentInUtils))
+            BaseTestHelper.assertCommentContentsListEquals(
+                reloaded.getCommentsForFile("src/Main.kt"),
+                listOf(commentInMain)
+            )
+            BaseTestHelper.assertCommentContentsListEquals(
+                reloaded.getCommentsForFile("src/Utils.kt"),
+                listOf(commentInUtils)
+            )
         }
     }
 
-    @Nested
-    inner class CommentCRUDWithFiles : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class CommentCRUDWithFiles : ReviewServiceTest() {
 
         @Test
         fun `test addComment creates comment and persists to file`() {
@@ -548,8 +553,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class CommentRetrievalMethods : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class CommentRetrievalMethods : ReviewServiceTest() {
 
         @Test
         fun `test getCommentsForFile returns empty when no active review`() {
@@ -651,8 +656,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class PathUtilities : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class PathUtilities : ReviewServiceTest() {
 
         @Test
         fun `test getRelativePath returns relative path for nested file`() {
@@ -683,6 +688,7 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         fun `test getRelativePath handles deeply nested paths`() {
             // Given: A deeply nested file
             createDirectory("src/main/kotlin/com/example")
+            @Suppress("JUnitMixedFramework")
             val file = createVirtualFile("src/main/kotlin/com/example/App.kt", "class App")
 
             // When: Getting relative path
@@ -693,8 +699,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class FileRenameHandling : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class FileRenameHandling : ReviewServiceTest() {
 
         @Test
         fun `test updateCommentsForFileRename updates all comments for a file`() {
@@ -774,8 +780,8 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class RangeMarkerManagement : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class RangeMarkerManagement : ReviewServiceTest() {
 
         @Test
         fun `test attachRangeMarker creates valid marker`() = runBlocking {
@@ -883,29 +889,29 @@ abstract class ReviewServiceIntegrationTests : LightPlatformTest() {
             val content = (1..10).joinToString("\n") { "line $it" }
             val file = createVirtualFile("src/Main.kt", content)
             readAction {
-            val document = FileDocumentManager.getInstance().getDocument(file)!!
+                val document = FileDocumentManager.getInstance().getDocument(file)!!
 
-            val review = BaseTestHelper.createReviewFile("test-review")
-            val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
-            review.comments.add(comment)
-            service.setActiveReview(review)
+                val review = BaseTestHelper.createReviewFile("test-review")
+                val comment = BaseTestHelper.createComment(1, "src/Main.kt", 2, 4, "Comment")
+                review.comments.add(comment)
+                service.setActiveReview(review)
 
-            service.attachRangeMarker(comment, document)
+                service.attachRangeMarker(comment, document)
 
-            // When: Disposing the marker (simulating invalidation)
-            comment.rangeMarker!!.dispose()
+                // When: Disposing the marker (simulating invalidation)
+                comment.rangeMarker!!.dispose()
 
-            // And: Updating lines from markers
-            service.updateCommentLinesFromMarkers(document)
+                // And: Updating lines from markers
+                service.updateCommentLinesFromMarkers(document)
 
-            // Then: Marker should be cleared
-            assertNull(comment.rangeMarker)
-                }
+                // Then: Marker should be cleared
+                assertNull(comment.rangeMarker)
+            }
         }
     }
 
-    @Nested
-    inner class RefreshAndNotification : ReviewServiceIntegrationTests() {
+    @Suppress("JUnitMixedFramework")
+    class RefreshAndNotification : ReviewServiceTest() {
 
         @Test
         fun `test refreshAllMarkers does not throw`() {

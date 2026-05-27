@@ -52,11 +52,11 @@
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
 
             <action id="ReviewMarkdownGenerator.AddCommentContextMenu"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddCommentContextMenuAction"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddCommentContextMenuAction"
                     text="Add Comment"/>
 
             <action id="ReviewMarkdownGenerator.AddOrEditComment"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddOrEditCommentAction"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddOrEditCommentAction"
                     text="Add or Edit Comment">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl R"/>
                 <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta R"/>
@@ -64,7 +64,7 @@
             </action>
 
             <action id="ReviewMarkdownGenerator.AddPageComment"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.AddPageCommentAction"
+                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddPageCommentAction"
                     text="Add Page Comment">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl shift R"/>
                 <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta shift R"/>

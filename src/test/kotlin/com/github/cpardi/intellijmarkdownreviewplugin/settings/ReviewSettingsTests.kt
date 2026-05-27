@@ -8,23 +8,25 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-/**
- * Tests default values, setter/getter behavior, change notifications, and state management.
- */
 @Suppress("JUnitMixedFramework")
-abstract class ReviewSettingsTests : LightPlatformTest() {
+object ReviewSettingsTestSuite {
 
-    private lateinit var settings: ReviewSettings
+    /**
+     * Tests default values, setter/getter behavior, change notifications, and state management.
+     */
+    abstract class ReviewSettingsTests : LightPlatformTest() {
 
-    override fun setUp() {
-        super.setUp()
-        settings = ReviewSettings.getInstance()
-        // Reset to default before each test
-        settings.reviewsDir = "reviews"
+        protected lateinit var settings: ReviewSettings
+
+        override fun setUp() {
+            super.setUp()
+            settings = ReviewSettings.getInstance()
+            // Reset to default before each test
+            settings.reviewsDir = "reviews"
+        }
     }
 
-    @Nested
-    inner class DefaultValues : ReviewSettingsTests() {
+    class DefaultValues : ReviewSettingsTests() {
 
         @Test
         fun `test reviewsDir default is reviews`() {
@@ -61,8 +63,7 @@ abstract class ReviewSettingsTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class SetterGetter : ReviewSettingsTests() {
+    class SetterGetter : ReviewSettingsTests() {
 
         @Test
         fun `test setter updates state value`() {
@@ -119,8 +120,7 @@ abstract class ReviewSettingsTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class SettingsChangeNotification : ReviewSettingsTests() {
+    class SettingsChangeNotification : ReviewSettingsTests() {
 
         @Test
         fun `test listener receives notification when value changes`() {
@@ -199,8 +199,7 @@ abstract class ReviewSettingsTests : LightPlatformTest() {
         }
     }
 
-    @Nested
-    inner class StateManagement : ReviewSettingsTests() {
+    class StateManagement : ReviewSettingsTests() {
 
         @Test
         fun `test State default reviewsDir is reviews`() {

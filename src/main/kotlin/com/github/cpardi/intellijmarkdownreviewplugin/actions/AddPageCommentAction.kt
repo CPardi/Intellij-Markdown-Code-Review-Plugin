@@ -1,4 +1,4 @@
-package com.github.cpardi.intellijmarkdownreviewplugin
+package com.github.cpardi.intellijmarkdownreviewplugin.actions
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
@@ -47,7 +47,7 @@ class AddPageCommentAction : AnAction(
         if (editor != null) {
             return e.getData(CommonDataKeys.VIRTUAL_FILE)
         }
-        
+
         // Fall back to Project View selection
         val files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)
         return if (files != null && files.size == 1) files[0] else null

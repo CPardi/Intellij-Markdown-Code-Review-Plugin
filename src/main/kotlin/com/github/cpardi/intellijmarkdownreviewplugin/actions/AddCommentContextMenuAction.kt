@@ -1,10 +1,8 @@
-package com.github.cpardi.intellijmarkdownreviewplugin
+package com.github.cpardi.intellijmarkdownreviewplugin.actions
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.github.cpardi.intellijmarkdownreviewplugin.ReviewBundle
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService
 import com.github.cpardi.intellijmarkdownreviewplugin.ui.NewCommentDialog
 

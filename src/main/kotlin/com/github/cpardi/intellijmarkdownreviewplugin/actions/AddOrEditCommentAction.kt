@@ -1,4 +1,4 @@
-package com.github.cpardi.intellijmarkdownreviewplugin
+package com.github.cpardi.intellijmarkdownreviewplugin.actions
 
 import com.github.cpardi.intellijmarkdownreviewplugin.ReviewBundle
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService
@@ -11,7 +11,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 
 /**
  * Action that adds or edits comments based on context.
- * 
+ *
  * Behavior:
  * - If no active review: Auto-create a new review
  * - If active review and selection/line has no comments: Show NewCommentDialog

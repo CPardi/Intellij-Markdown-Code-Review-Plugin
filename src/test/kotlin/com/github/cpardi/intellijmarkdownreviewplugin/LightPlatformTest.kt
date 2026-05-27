@@ -6,6 +6,7 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.PsiManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -63,7 +64,8 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
      */
     @Throws(IOException::class)
     protected fun createVirtualFile(relativePath: String, content: String): VirtualFile {
-        return myFixture.addFileToProject(relativePath, content).virtualFile
+        val file = myFixture.addFileToProject(relativePath, content)
+        return file.virtualFile
     }
 
     /**
