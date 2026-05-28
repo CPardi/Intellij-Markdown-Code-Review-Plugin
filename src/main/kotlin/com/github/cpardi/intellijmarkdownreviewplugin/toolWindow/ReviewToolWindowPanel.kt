@@ -22,14 +22,11 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
-import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.event.FocusAdapter
 import java.awt.event.FocusEvent
 import java.awt.event.ItemEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
 import java.nio.file.Path
 import javax.swing.*
 
@@ -217,86 +214,25 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
             return CommentBubblePanel().apply {
                 border = JBUI.Borders.empty(10, 12, 10, 12)
 
-                // Header with file path and line range (or "Page" for page comments)
-                val headerText = if (comment.isPageComment()) {
+                // Header
+                headerText = if (comment.isPageComment()) {
                     "$displayPath:${comment.getLineRangeText()} [Page]"
                 } else {
                     "$displayPath:${comment.getLineRangeText()}:${comment.getLineRangeText()}"
                 }
+                onHeaderClick = { navigateToComment(comment) }
 
-                val header = JBLabel(headerText).apply {
-                    toolTipText = "Click to navigate"
-                    cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                    addMouseListener(object : MouseAdapter() {
-                        override fun mouseClicked(e: MouseEvent?) {
-                            navigateToComment(comment)
-                        }
-                    })
-                }
+                // Delete Button
+                onDelete = { commentId -> onDeleteComment(commentId) }
 
-                // Comment body text field
-                val bodyField = JBTextArea(comment.body).apply {
-                    lineWrap = true
-                    wrapStyleWord = true
-                    border = JBUI.Borders.empty(5)
-                }
-
-                // Wrap in panel with minimum height and border
-                val fontMetrics = bodyField.getFontMetrics(bodyField.font)
-                val minHeight = fontMetrics.height * 3
-                val defaultBorderColor = CommentBubblePanel.getUnfocusedBorderColor()
-                val bodyPanel = object : JBPanel<JBPanel<*>>(BorderLayout()) {
-                    override fun getPreferredSize(): Dimension {
-                        val size = super.getPreferredSize()
-                        return Dimension(size.width, maxOf(size.height, minHeight))
-                    }}.apply {
-                    border = JBUI.Borders.customLine(defaultBorderColor)
-                    add(bodyField, BorderLayout.CENTER)
-                }
-
-                // Change border on focus
-                bodyField.addFocusListener(object : FocusAdapter() {
-                    override fun focusGained(e: FocusEvent?) {
-                        bodyPanel.border = JBUI.Borders.customLine(JBUI.CurrentTheme.Focus.focusColor())
+                // Body text
+                bodyText = comment.body
+                onBodyFocusLost = { e ->
+                    val newBody = bodyText
+                    if (newBody != comment.body && !newBody.contains("---")) {
+                        service.editComment(comment.id, newBody)
                     }
-
-                    override fun focusLost(e: FocusEvent?) {
-                        bodyPanel.border = JBUI.Borders.customLine(defaultBorderColor)
-                    }
-                })
-
-                // Delete button
-                val deleteButton = JButton("Delete").apply {
-                    toolTipText = "Delete comment"
-                    addActionListener { onDeleteComment(comment.id) }
-                    background = defaultBorderColor
-                    isOpaque = false
                 }
-
-                // Button panel
-                val buttonPanel = JPanel(FlowLayout(FlowLayout.RIGHT)).apply {
-                    add(deleteButton)
-                    isOpaque = false
-                }
-
-                // Layout
-                val topPanel = JPanel(BorderLayout()).apply {
-                    add(header, BorderLayout.WEST)
-                    add(buttonPanel, BorderLayout.EAST)
-                }
-
-                add(topPanel, BorderLayout.NORTH)
-                add(bodyPanel, BorderLayout.CENTER)
-
-                // Save body on focus lost
-                bodyField.addFocusListener(object : FocusAdapter() {
-                    override fun focusLost(e: FocusEvent?) {
-                        val newBody = bodyField.text
-                        if (newBody != comment.body && !newBody.contains("---")) {
-                            service.editComment(comment.id, newBody)
-                        }
-                    }
-                })
             }
         }
 
