@@ -1,5 +1,8 @@
 # IntelliJ Platform Plugin Template
 
+- Do not read the entire project, only files related to the task
+- Do not read other plans or reviews only the one under consideration
+
 ## Tech Layers
 
 - **Build System**: Gradle
@@ -48,6 +51,7 @@
 
 ### Comments
 
+- Write comments using British English
 - Use inline comments sparingly and only to explain unobvious behaviour
 - Don't include comments describing the specifics of the current change.
 - Do not add comments that repeat a definition's name and type.

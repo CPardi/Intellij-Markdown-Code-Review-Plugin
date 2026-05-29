@@ -27,10 +27,10 @@ import java.awt.Color
 class CommentRangeHighlighter(private val project: Project) {
 
     private val LOG = thisLogger()
-    
+
     /** Light yellow background color for line comment highlights */
     private val LINE_HIGHLIGHT_COLOR = JBColor(Color(255, 255, 224), Color(75, 75, 40))
-    
+
     /** Very light cream background for page comments (lighter than line comments) with 50% transparency */
     private val PAGE_HIGHLIGHT_COLOR = JBColor(Color(255, 255, 240, 128), Color(60, 60, 35, 128))
 
@@ -61,7 +61,7 @@ class CommentRangeHighlighter(private val project: Project) {
         project.messageBus.connect(project).subscribe<ReviewChangeListener>(
             ReviewService.REVIEW_CHANGE_TOPIC,
             object : ReviewChangeListener {
-                override fun onCommentsChanged() {
+                override fun onCommentsChanged(commentId: Int?) {
                     ApplicationManager.getApplication().invokeLater {
                         refreshAllHighlights()
                     }
@@ -85,13 +85,13 @@ class CommentRangeHighlighter(private val project: Project) {
         val comments = service.getCommentsForFile(relativePath)
 
         val document = runReadAction { FileDocumentManager.getInstance().getDocument(file) } ?: return
-        
+
         // Attach RangeMarkers for comments in this file
         service.updateRangeMarkersForFile(relativePath, document)
-        
+
         // Remove existing highlights first
         removeHighlights(file)
-        
+
         // Apply new highlights
         val highlighters = mutableListOf<RangeHighlighter>()
         val markupModel = com.intellij.openapi.editor.EditorFactory.getInstance()
@@ -101,17 +101,17 @@ class CommentRangeHighlighter(private val project: Project) {
         // Separate page comments from line comments
         val pageComments = comments.filter { it.isPageComment() }
         val lineComments = comments.filter { !it.isPageComment() }
-        
+
         // Apply page comment highlights first (lower layer)
         for (comment in pageComments) {
             try {
                 // Highlight entire file for page comments
                 val startOffset = 0
                 val endOffset = document.textLength
-                
+
                 val textAttributes = TextAttributes()
                 textAttributes.backgroundColor = PAGE_HIGHLIGHT_COLOR
-                
+
                 val highlighter = markupModel.addRangeHighlighter(
                     startOffset,
                     endOffset,
@@ -119,7 +119,7 @@ class CommentRangeHighlighter(private val project: Project) {
                     textAttributes,
                     HighlighterTargetArea.LINES_IN_RANGE
                 )
-                
+
                 highlighters.add(highlighter)
             } catch (e: Exception) {
                 LOG.warn("Failed to highlight page comment ${comment.id}: ${e.message}")
@@ -131,10 +131,10 @@ class CommentRangeHighlighter(private val project: Project) {
             try {
                 val startOffset = document.getLineStartOffset(comment.startLine - 1)
                 val endOffset = document.getLineEndOffset(comment.endLine - 1)
-                
+
                 val textAttributes = TextAttributes()
                 textAttributes.backgroundColor = LINE_HIGHLIGHT_COLOR
-                
+
                 val highlighter = markupModel.addRangeHighlighter(
                     startOffset,
                     endOffset,
@@ -142,13 +142,13 @@ class CommentRangeHighlighter(private val project: Project) {
                     textAttributes,
                     HighlighterTargetArea.LINES_IN_RANGE
                 )
-                
+
                 highlighters.add(highlighter)
             } catch (e: Exception) {
                 LOG.warn("Failed to highlight comment ${comment.id}: ${e.message}")
             }
         }
-        
+
         activeHighlighters[relativePath] = highlighters
     }
 
@@ -158,7 +158,7 @@ class CommentRangeHighlighter(private val project: Project) {
     private fun removeHighlights(file: VirtualFile) {
         val service = ReviewService.getInstance(project)
         val relativePath = service.getRelativePath(file)
-        
+
         val highlighters = activeHighlighters.remove(relativePath) ?: return
         for (highlighter in highlighters) {
             try {

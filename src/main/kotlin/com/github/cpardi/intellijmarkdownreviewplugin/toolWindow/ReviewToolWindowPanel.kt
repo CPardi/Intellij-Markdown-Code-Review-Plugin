@@ -19,13 +19,9 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
-import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
-import java.awt.Dimension
 import java.awt.FlowLayout
-import java.awt.event.FocusAdapter
-import java.awt.event.FocusEvent
 import java.awt.event.ItemEvent
 import java.nio.file.Path
 import javax.swing.*
@@ -37,12 +33,14 @@ import javax.swing.*
 class ReviewToolWindowPanel(private val project: Project, private val service: ReviewService) : JBPanel<ReviewToolWindowPanel>(BorderLayout()) {
 
     private var isUpdatingSelection = false
+    private val commentPanelMap = mutableMapOf<Int, CommentBubblePanel>()
 
     private val fileEditorManager get() = FileEditorManager.getInstance(project)
 
     internal val reviewComboBox = ComboBox<String>()
     internal val addButton = JButton("Add")
     internal val deleteButton = JButton("Delete")
+    internal val noCommentsLabel = JBLabel(ReviewBundle.message("noComments")).apply { border = JBUI.Borders.empty(10) }
     internal val commentsPanel = JPanel().apply { border = JBUI.Borders.empty(10) }
     internal val commentsScrollPane = JScrollPane(commentsPanel)
 
@@ -89,17 +87,17 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
         setupTopBar()
         setupCommentsList()
         refreshReviewList()
-        refreshCommentsList()
+        refreshAllComments()
 
         // Subscribe to change notifications
         project.messageBus.connect().subscribe(
             ReviewService.REVIEW_CHANGE_TOPIC,
             object : ReviewChangeListener {
-                override fun onCommentsChanged() = ApplicationManager.getApplication().invokeLater { refreshCommentsList() }
+                override fun onCommentsChanged(commentId: Int?) = ApplicationManager.getApplication().invokeLater { updateSingleComment(commentId) }
 
                 override fun onReviewChanged() = ApplicationManager.getApplication().invokeLater {
                     refreshReviewList()
-                    refreshCommentsList()
+                    refreshAllComments()
                 }
             }
         )
@@ -112,7 +110,7 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
                     ApplicationManager.getApplication().invokeLater {
                         service.setActiveReview(null)
                         refreshReviewList()
-                        refreshCommentsList()
+                        refreshAllComments()
                     }
                 }
             }
@@ -157,7 +155,7 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
     internal fun onCreateNewReview() {
         service.createNewReview().getOrShowError(project) ?: return
         refreshReviewList()
-        refreshCommentsList()
+        refreshAllComments()
     }
 
     internal fun onDeleteReview() {
@@ -173,13 +171,13 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
             // Explicitly clear active review to ensure UI state is consistent
             service.setActiveReview(null)
             refreshReviewList()
-            refreshCommentsList()
+            refreshAllComments()
         }
     }
 
     internal fun onDeleteComment(commentId: Int) {
         service.deleteComment(commentId)
-        refreshCommentsList()
+        refreshAllComments()
     }
 
     // Helper functions
@@ -209,8 +207,9 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
         }
     }
 
-    private fun refreshCommentsList() {
-        fun createCommentItem(comment: Comment, displayPath: String): JPanel {
+
+    private fun refreshAllComments() {
+        fun createCommentItem(comment: Comment, displayPath: String): CommentBubblePanel {
             return CommentBubblePanel().apply {
                 border = JBUI.Borders.empty(10, 12, 10, 12)
 
@@ -236,13 +235,12 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
             }
         }
 
+        commentPanelMap.clear()
         commentsPanel.removeAll()
 
         val review = service.activeReview
         if (review == null || review.isEmpty()) {
-            commentsPanel.add(JBLabel(ReviewBundle.message("noComments")).apply {
-                border = JBUI.Borders.empty(10)
-            })
+            commentsPanel.add(noCommentsLabel)
         } else {
             // Sort comments: page comments first, then by path, then by line
             val sortedComments = review.comments.sortedWith(
@@ -255,7 +253,9 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
 
             val displayPaths = computeDisplayPaths(sortedComments)
             for ((index, comment) in sortedComments.withIndex()) {
-                commentsPanel.add(createCommentItem(comment, displayPaths[comment.id]!!))
+                val panel = createCommentItem(comment, displayPaths[comment.id]!!)
+                commentPanelMap[comment.id] = panel
+                commentsPanel.add(panel)
                 // Add spacing between bubbles (but not after the last one)
                 if (index < sortedComments.lastIndex) {
                     commentsPanel.add(Box.createVerticalStrut(JBUI.scale(8)))
@@ -265,6 +265,13 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
 
         commentsPanel.revalidate()
         commentsPanel.repaint()
+    }
+
+    private fun updateSingleComment(commentId: Int?) {
+        if(commentId == null) return refreshAllComments()
+        val comment = service.getCommentById(commentId) ?: return refreshAllComments()
+        val panel = commentPanelMap[commentId] ?: return refreshAllComments()
+        panel.bodyText = comment.body
     }
 
     private fun computeDisplayPaths(comments: List<Comment>): Map<Int, String> {

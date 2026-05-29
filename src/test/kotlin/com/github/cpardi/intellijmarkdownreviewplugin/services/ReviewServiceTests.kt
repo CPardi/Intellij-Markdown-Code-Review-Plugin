@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
  * Platform components and are tested in ReviewServiceIntegrationTests.
  *
  * These tests verify:
- * - Null activeReview behavior for retrieval methods
+ * - Null activeReview behaviour for retrieval methods
  * - Delegation to ReviewFile for CRUD operations (when activeReview is set)
  * - NONE_SENTINEL constant value
  * - activeReview default value
@@ -359,6 +359,45 @@ class ReviewServiceTests : UnitTest() {
 
             // Then: Should have a meaningful display name
             assertEquals("Review Change Topic", topic.displayName)
+        }
+
+        @Test
+        fun `test onCommentsChanged accepts null commentId for full refresh`() {
+            // Given: A listener created via ServiceTestHelper
+            val (listener, tracker) = ServiceTestHelper.createReviewChangeListener()
+
+            // When: Called with null (full refresh)
+            listener.onCommentsChanged(null)
+
+            // Then: Should track that comments changed
+            assertTrue(tracker.commentsChanged.get())
+            assertNull(tracker.lastCommentId.get())
+        }
+
+        @Test
+        fun `test onCommentsChanged accepts specific commentId for incremental update`() {
+            // Given: A listener created via ServiceTestHelper
+            val (listener, tracker) = ServiceTestHelper.createReviewChangeListener()
+
+            // When: Called with specific comment ID (incremental update)
+            listener.onCommentsChanged(42)
+
+            // Then: Should track the specific comment ID
+            assertTrue(tracker.commentsChanged.get())
+            assertEquals(42, tracker.lastCommentId.get())
+        }
+
+        @Test
+        fun `test onCommentsChanged default parameter is null`() {
+            // Given: A listener created via ServiceTestHelper
+            val (listener, tracker) = ServiceTestHelper.createReviewChangeListener()
+
+            // When: Called without parameter (uses default)
+            listener.onCommentsChanged()
+
+            // Then: Should have null commentId (full refresh)
+            assertTrue(tracker.commentsChanged.get())
+            assertNull(tracker.lastCommentId.get())
         }
     }
 }

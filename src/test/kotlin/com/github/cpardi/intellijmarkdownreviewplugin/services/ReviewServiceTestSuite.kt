@@ -909,24 +909,4 @@ object ReviewServiceTestSuite {
             }
         }
     }
-
-    @Suppress("JUnitMixedFramework")
-    class RefreshAndNotification : ReviewServiceTest() {
-
-        @Test
-        fun `test refreshAllMarkers does not throw`() {
-            // Given: A service with no active review
-            // When: Refreshing all markers
-            // Then: Should not throw
-            service.refreshAllMarkers()
-        }
-
-        @Test
-        fun `test refreshToolWindow does not throw`() {
-            // Given: A service with no active review
-            // When: Refreshing tool window
-            // Then: Should not throw
-            service.refreshToolWindow()
-        }
-    }
 }

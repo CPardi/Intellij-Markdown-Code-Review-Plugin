@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture
  * Listener interface for UI refresh events.
  */
 interface ReviewChangeListener {
-    fun onCommentsChanged()
+    fun onCommentsChanged(commentId: Int? = null)
     fun onReviewChanged()
 }
 
@@ -278,7 +278,7 @@ class ReviewService(private val project: Project) {
 
         comment.body = newBody
         saveActiveReview()
-        notifyCommentsChanged()
+        notifyCommentsChanged(id)
 
         LOG.info("Updated comment $id")
         return true
@@ -540,24 +540,8 @@ class ReviewService(private val project: Project) {
         return VfsUtil.getRelativePath(file, baseDir) ?: file.path
     }
 
-    // ==================== UI Refresh Coordination ====================
-
-    /**
-     * Triggers UI refresh for gutter icons.
-     */
-    fun refreshAllMarkers() {
-        notifyCommentsChanged()
-    }
-
-    /**
-     * Notifies the tool window to rebuild its list.
-     */
-    fun refreshToolWindow() {
-        notifyCommentsChanged()
-    }
-
-    private fun notifyCommentsChanged() {
-        project.messageBus.syncPublisher(REVIEW_CHANGE_TOPIC).onCommentsChanged()
+    private fun notifyCommentsChanged(commentId: Int? = null) {
+        project.messageBus.syncPublisher(REVIEW_CHANGE_TOPIC).onCommentsChanged(commentId)
     }
 
     private fun notifyReviewChanged() {
