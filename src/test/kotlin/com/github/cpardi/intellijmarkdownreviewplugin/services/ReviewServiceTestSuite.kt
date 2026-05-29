@@ -8,7 +8,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 object ReviewServiceTestSuite {
 
@@ -265,10 +264,9 @@ object ReviewServiceTestSuite {
             assertNotNull(service.activeReview)
 
             // When: Setting active review to null
-            val future = service.setActiveReview(null)
+            service.setActiveReview(null)
 
             // Then: Should clear active review
-            future.get(5, TimeUnit.SECONDS)
             assertNull(service.activeReview)
         }
 
@@ -279,31 +277,10 @@ object ReviewServiceTestSuite {
             assertNotNull(service.activeReview)
 
             // When: Setting active review to NONE_SENTINEL
-            val future = service.setActiveReview(ReviewService.NONE_SENTINEL)
+            service.setActiveReview(ReviewService.NONE_SENTINEL)
 
             // Then: Should clear active review
-            future.get(5, TimeUnit.SECONDS)
             assertNull(service.activeReview)
-        }
-
-        @Test
-        fun `test returns completed future for null`() {
-            // Given: No active review
-            // When: Setting active review to null
-            val future = service.setActiveReview(null)
-
-            // Then: Should return already completed future
-            assertTrue(future.isDone)
-        }
-
-        @Test
-        fun `test returns completed future for NONE_SENTINEL`() {
-            // Given: No active review
-            // When: Setting active review to NONE_SENTINEL
-            val future = service.setActiveReview(ReviewService.NONE_SENTINEL)
-
-            // Then: Should return already completed future
-            assertTrue(future.isDone)
         }
 
         @Test
@@ -314,8 +291,7 @@ object ReviewServiceTestSuite {
             createVirtualFile("reviews/test-review.md", content)
 
             // When: Setting active review
-            val future = service.setActiveReview("test-review")
-            future.get(10, TimeUnit.SECONDS)
+            service.setActiveReview("test-review")
 
             // Then: Should load and set the review
             assertNotNull(service.activeReview)
@@ -329,8 +305,7 @@ object ReviewServiceTestSuite {
             createDirectory("reviews")
 
             // When: Setting active review to non-existent file
-            val future = service.setActiveReview("nonexistent")
-            future.get(10, TimeUnit.SECONDS)
+            service.setActiveReview("nonexistent")
 
             // Then: Active review should be null
             assertNull(service.activeReview)
@@ -379,7 +354,7 @@ object ReviewServiceTestSuite {
 
             // When: Saving and reloading
             service.saveActiveReview()
-            service.setActiveReview(review.name).get(10, TimeUnit.SECONDS)
+            service.setActiveReview(review.name)
 
             // Then: Comments should be preserved
             val reloaded = service.activeReview!!
@@ -688,7 +663,6 @@ object ReviewServiceTestSuite {
         fun `test getRelativePath handles deeply nested paths`() {
             // Given: A deeply nested file
             createDirectory("src/main/kotlin/com/example")
-            @Suppress("JUnitMixedFramework")
             val file = createVirtualFile("src/main/kotlin/com/example/App.kt", "class App")
 
             // When: Getting relative path

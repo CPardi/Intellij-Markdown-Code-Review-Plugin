@@ -5,8 +5,6 @@ import com.github.cpardi.intellijmarkdownreviewplugin.ReviewBundle
 import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService
 import com.github.cpardi.intellijmarkdownreviewplugin.toolWindow.ReviewToolWindowPanel
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
-
 
 @Suppress("JUnitMixedFramework")
 object ReviewToolWindowPanelTestSuite {
@@ -14,7 +12,7 @@ object ReviewToolWindowPanelTestSuite {
     /**
      * Base class for integration tests of ReviewToolWindowPanel.
      */
-    abstract class ReviewToolWindowPanelTests : LightPlatformTest() {
+    abstract class ReviewToolWindowPanelTest : LightPlatformTest() {
 
         protected lateinit var service: ReviewService
 
@@ -25,10 +23,10 @@ object ReviewToolWindowPanelTestSuite {
         }
     }
 
-    class ToolWindowInit : ReviewToolWindowPanelTests() {
+    class ToolWindowInit : ReviewToolWindowPanelTest() {
 
         @Test
-        fun `Panel initialised with available reviews`() {
+        fun `test panel initialised with available reviews`() {
             // Given: Multiple reviews exist
             createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
@@ -46,7 +44,7 @@ object ReviewToolWindowPanelTestSuite {
         }
 
         @Test
-        fun `Help text shown when review without comments is active`() {
+        fun `test help text shown when review without comments is active`() {
             // Given: A reviews without comments
             val reviewName = "review-1"
             createVirtualFile("reviews/${reviewName}.md", "")
@@ -54,8 +52,7 @@ object ReviewToolWindowPanelTestSuite {
             createVirtualFile(xmlFile, "<xml>\n</xml>")
 
             // When: Review without comments is active
-            val future = service.setActiveReview(reviewName)
-            future.get(5, TimeUnit.SECONDS)
+            service.setActiveReview(reviewName)
             val panel = ReviewToolWindowPanel(project, service);
 
             // Then: Help label is shown
@@ -64,7 +61,7 @@ object ReviewToolWindowPanelTestSuite {
         }
 
         @Test
-        fun `Comments shown when review with comments is active`() {
+        fun `test comments shown when review with comments is active`() {
             // Given: A reviews with two comments
             val reviewName = "review-1"
             createVirtualFile("reviews/${reviewName}.md", "")
@@ -72,8 +69,7 @@ object ReviewToolWindowPanelTestSuite {
             createVirtualFile(xmlFile, "<xml>\n</xml>")
 
             // When: Review with two comments is active
-            val future = service.setActiveReview(reviewName)
-            future.get(5, TimeUnit.SECONDS)
+            service.setActiveReview(reviewName)
             service.addComment(xmlFile, 1, 1, "First comment")
             service.addComment(xmlFile, 2, 2, "Second comment")
 

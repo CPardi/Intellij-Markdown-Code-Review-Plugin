@@ -2,7 +2,6 @@ package com.github.cpardi.intellijmarkdownreviewplugin.services
 
 import com.github.cpardi.intellijmarkdownreviewplugin.LightPlatformTest
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 @Suppress("JUnitMixedFramework")
 object ReviewAsyncFileListenerTestSuite {
@@ -64,7 +63,7 @@ object ReviewAsyncFileListenerTestSuite {
             // Then: Review should be persisted
             // Reload from disk
             service.setActiveReview(null)
-            service.setActiveReview("review-1").get(5, TimeUnit.SECONDS)
+            service.setActiveReview("review-1")
 
             // And: Paths should be updated
             assertNotNull(service.activeReview)
@@ -311,7 +310,7 @@ object ReviewAsyncFileListenerTestSuite {
 
             // Then: Changes should be persisted
             service.setActiveReview(null)
-            service.setActiveReview("review-1").get(5, TimeUnit.SECONDS)
+            service.setActiveReview("review-1")
 
             val reloaded = service.activeReview!!
             assertEquals(2, reloaded.comments.size)

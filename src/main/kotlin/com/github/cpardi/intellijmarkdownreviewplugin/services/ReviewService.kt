@@ -18,7 +18,6 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.messages.Topic
-import java.util.concurrent.CompletableFuture
 
 /**
  * Listener interface for UI refresh events.
@@ -54,23 +53,18 @@ class ReviewService(private val project: Project) {
      * Sets the active review by loading from disk.
      * Pass null to select <None>.
      * @param name The review name, or null for <None>
-     * @return CompletableFuture that completes when the review is loaded
      */
-    fun setActiveReview(name: String): CompletableFuture<Void> {
-        if (name == NONE_SENTINEL) {
-            return setActiveReview(null as ReviewFile?)
-        }
-
-        return setActiveReview(loadReview(name))
+    fun setActiveReview(name: String) {
+        if (name == NONE_SENTINEL) setActiveReview(null as ReviewFile?)
+        else setActiveReview(loadReview(name))
     }
 
     /**
-     * Sets the active review
+     * Sets the active review.
      * Pass null to select <None>.
      * @param review The review, or null for <None>
-     * @return CompletableFuture that completes when the review is loaded
      */
-    fun setActiveReview(review: ReviewFile?): CompletableFuture<Void> {
+    fun setActiveReview(review: ReviewFile?) {
         if (review == null) {
             synchronized(this) {
                 activeReview = null
@@ -78,16 +72,11 @@ class ReviewService(private val project: Project) {
             LOG.info("Set active review to <None>")
             notifyReviewChanged()
             refreshOpenEditors()
-            return CompletableFuture.completedFuture(null)
-        }
-
-        return CompletableFuture.supplyAsync {
-            review
-        }.thenAccept { review ->
+        } else {
             synchronized(this) {
                 activeReview = review
             }
-            LOG.info("Set active review to: $review.name")
+            LOG.info("Set active review to: ${review.name}")
             attachRangeMarkersForOpenFiles()
             notifyReviewChanged()
             refreshOpenEditors()
