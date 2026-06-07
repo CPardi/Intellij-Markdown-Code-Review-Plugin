@@ -105,12 +105,12 @@ jobs:
       - name: Generate Coverage Report
         run: ./gradlew koverHtmlReport koverXmlReport
 
-      # Add coverage report to PR
-      - name: Add Coverage Report to PR
+      # Add coverage report
+      - name: Display Coverage Report
         id: kover
         uses: madrapps/jacoco-report@v1.8.0
         with:
-          paths: ${{ github.workspace }}/build/reports/kover/xml/report.xml
+          paths: ${{ github.workspace }}/build/reports/kover/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 50
           min-coverage-changed-files: 60

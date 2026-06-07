@@ -7,6 +7,7 @@ import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 object ReviewServiceTestSuite {
@@ -25,6 +26,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class GetAvailableReviewNames : ReviewServiceTest() {
 
@@ -94,6 +96,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class CreateNewReview : ReviewServiceTest() {
 
@@ -172,6 +175,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class DeleteReview : ReviewServiceTest() {
 
@@ -254,6 +258,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class SetActiveReview : ReviewServiceTest() {
 
@@ -312,6 +317,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class SaveActiveReview : ReviewServiceTest() {
 
@@ -370,6 +376,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class CommentCRUDWithFiles : ReviewServiceTest() {
 
@@ -528,6 +535,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class CommentRetrievalMethods : ReviewServiceTest() {
 
@@ -631,6 +639,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class PathUtilities : ReviewServiceTest() {
 
@@ -673,6 +682,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class FileRenameHandling : ReviewServiceTest() {
 
@@ -754,6 +764,7 @@ object ReviewServiceTestSuite {
         }
     }
 
+    @Nested
     @Suppress("JUnitMixedFramework")
     class RangeMarkerManagement : ReviewServiceTest() {
 
