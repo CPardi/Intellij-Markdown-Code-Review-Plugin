@@ -68,6 +68,8 @@ jobs:
     name: Test
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
 
       # Free GitHub Actions Environment Disk Space
@@ -101,6 +103,19 @@ jobs:
       # Generate coverage reports
       - name: Generate Coverage Report
         run: ./gradlew koverHtmlReport koverXmlReport
+
+      # Add coverage report to PR
+      - name: Add Coverage Report to PR
+        id: kover
+        uses: madrapps/jacoco-report@v1.8.0
+        if: github.event_name == 'pull_request'
+        with:
+          paths: ${{ github.workspace }}/build/reports/kover/xml/report.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 50
+          min-coverage-changed-files: 60
+          title: Code Coverage
+          update-comment: true
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
