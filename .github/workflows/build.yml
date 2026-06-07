@@ -68,6 +68,9 @@ jobs:
     name: Test
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
 
       # Free GitHub Actions Environment Disk Space
@@ -98,6 +101,23 @@ jobs:
       - name: Run Tests
         run: ./gradlew check
 
+      # Generate coverage reports
+      - name: Generate Coverage Report
+        run: ./gradlew koverHtmlReport koverXmlReport
+
+      # Add coverage report to PR
+      - name: Add Coverage Report to PR
+        id: kover
+        uses: madrapps/jacoco-report@v1.8.0
+        if: github.event_name == 'pull_request'
+        with:
+          paths: ${{ github.workspace }}/build/reports/kover/xml/report.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 50
+          min-coverage-changed-files: 60
+          title: Code Coverage
+          update-comment: true
+
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
         if: ${{ failure() }}
@@ -105,6 +125,16 @@ jobs:
         with:
           name: tests-result
           path: ${{ github.workspace }}/build/reports/tests
+
+      # Upload coverage reports as artifacts
+      - name: Upload Coverage Reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            ${{ github.workspace }}/build/reports/kover/html
+            ${{ github.workspace }}/build/reports/kover/xml
 
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
