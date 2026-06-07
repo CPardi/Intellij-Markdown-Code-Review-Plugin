@@ -98,6 +98,10 @@ jobs:
       - name: Run Tests
         run: ./gradlew check
 
+      # Generate coverage reports
+      - name: Generate Coverage Report
+        run: ./gradlew koverHtmlReport koverXmlReport
+
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
         if: ${{ failure() }}
@@ -105,6 +109,16 @@ jobs:
         with:
           name: tests-result
           path: ${{ github.workspace }}/build/reports/tests
+
+      # Upload coverage reports as artifacts
+      - name: Upload Coverage Reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            ${{ github.workspace }}/build/reports/kover/html
+            ${{ github.workspace }}/build/reports/kover/xml
 
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:

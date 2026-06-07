@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.changelog")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 dependencies {
@@ -25,6 +26,13 @@ dependencies {
         intellijIdea("2025.3.4")
         testFramework(TestFrameworkType.Platform)
     }
+}
+
+kover {
+    // Configure coverage reports - generates both HTML and XML reports by default
+    // Run: ./gradlew koverHtmlReport for HTML report
+    // Run: ./gradlew koverXmlReport for XML report (for CI integration)
+    // Run: ./gradlew koverVerify to verify coverage thresholds
 }
 
 tasks {
