@@ -1,5 +1,6 @@
 package com.github.cpardi.intellijmarkdownreviewplugin.toolWindow
 
+import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -13,7 +14,7 @@ import com.intellij.icons.AllIcons
 class ReviewToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val panel = ReviewToolWindowPanel(project)
+        val panel = ReviewToolWindowPanel(project, ReviewService.getInstance(project))
         val content = ContentFactory.getInstance().createContent(panel, null, false)
         toolWindow.contentManager.addContent(content)
     }

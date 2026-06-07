@@ -6,12 +6,13 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.psi.PsiManager
+import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
+import java.awt.EventQueue.invokeAndWait
 import java.io.IOException
 
 /**
@@ -194,4 +195,12 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
             projectBaseDir.refresh(false, true)
         }
     }
+
+    // ==================== UI Thread Helpers ====================
+
+    /**
+     * Processes all pending invokeLater calls on the EDT.
+     * Use this after triggering async UI updates to ensure they complete before assertions.
+     */
+    protected fun flushPendingUiUpdates() = invokeAndWait { PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue() }
 }

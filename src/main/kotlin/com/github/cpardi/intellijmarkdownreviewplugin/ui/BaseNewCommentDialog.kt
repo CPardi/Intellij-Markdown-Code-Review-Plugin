@@ -18,7 +18,7 @@ import javax.swing.JScrollPane
  * Provides common functionality for creating new comments.
  */
 abstract class BaseNewCommentDialog(
-    project: Project
+    project: Project,
 ) : DialogWrapper(project) {
 
     protected val textArea = JBTextArea()
@@ -52,13 +52,7 @@ abstract class BaseNewCommentDialog(
             add(JLabel(getLocationText()), BorderLayout.NORTH)
 
             // Comment text area
-            textArea.apply {
-                rows = 10
-                columns = 50
-                lineWrap = true
-                wrapStyleWord = true
-                emptyText.text = ReviewBundle.message("enterComment")
-            }
+            textArea.apply { rows = 10; columns = 50; lineWrap = true; wrapStyleWord = true; emptyText.text = ReviewBundle.message("enterComment") }
             add(JScrollPane(textArea), BorderLayout.CENTER)
 
             // Set preferred size
@@ -91,18 +85,17 @@ abstract class BaseNewCommentDialog(
         if (body.isNotEmpty() && !body.contains("---")) {
             doCreate(body)
         }
+
         super.doOKAction()
     }
 
     /**
      * Provides the location text to display in the dialog.
-     * Subclasses implement this to show different location formats.
      */
     protected abstract fun getLocationText(): String
 
     /**
      * Creates the comment in the service.
-     * Subclasses implement this to call different service methods.
      */
     protected abstract fun doCreate(body: String)
 }

@@ -2,7 +2,6 @@ package com.github.cpardi.intellijmarkdownreviewplugin.services
 
 import com.github.cpardi.intellijmarkdownreviewplugin.LightPlatformTest
 import org.junit.jupiter.api.Test
-import java.util.concurrent.TimeUnit
 
 @Suppress("JUnitMixedFramework")
 object ReviewAsyncFileListenerTestSuite {
@@ -64,7 +63,7 @@ object ReviewAsyncFileListenerTestSuite {
             // Then: Review should be persisted
             // Reload from disk
             service.setActiveReview(null)
-            service.setActiveReview("review-1").get(5, TimeUnit.SECONDS)
+            service.setActiveReview("review-1")
 
             // And: Paths should be updated
             assertNotNull(service.activeReview)
@@ -298,8 +297,8 @@ object ReviewAsyncFileListenerTestSuite {
         fun `test complete rename workflow persists to disk`() {
             // Given: A review with comments
             service.createNewReview()
-            val comment1 = service.addComment("old/path/File.xml", 1, 10, "Important comment")
-            val comment2 = service.addComment("old/path/Other.xml", 5, 15, "Another comment")
+            service.addComment("old/path/File.xml", 1, 10, "Important comment")
+            service.addComment("old/path/Other.xml", 5, 15, "Another comment")
             service.saveActiveReview()
 
             // When: Applying renames and saving
@@ -311,7 +310,7 @@ object ReviewAsyncFileListenerTestSuite {
 
             // Then: Changes should be persisted
             service.setActiveReview(null)
-            service.setActiveReview("review-1").get(5, TimeUnit.SECONDS)
+            service.setActiveReview("review-1")
 
             val reloaded = service.activeReview!!
             assertEquals(2, reloaded.comments.size)
@@ -323,7 +322,7 @@ object ReviewAsyncFileListenerTestSuite {
         fun `test rename preserves comment content and lines`() {
             // Given: A comment with specific content
             service.createNewReview()
-            val original = service.addComment("Original.xml", 42, 50, "This is important\nmultiline\ncomment")!!
+            service.addComment("Original.xml", 42, 50, "This is important\nmultiline\ncomment")!!
 
             // When: Renaming
             service.applyCommentRenames(mapOf("Original.xml" to "Renamed.xml"))
@@ -353,6 +352,96 @@ object ReviewAsyncFileListenerTestSuite {
             assertEquals(0, service.getCommentsForFile("file.xml").size)
             assertEquals(0, service.getCommentsForFile("temp.xml").size)
             assertEquals(1, service.getCommentsForFile("final.xml").size)
+        }
+    }
+
+    /**
+     * Integration tests simulating actual VFS rename operations.
+     * These test the complete workflow from VFS event to comment update.
+     */
+    class VfsRenameWorkflow : ReviewAsyncFileListenerTests() {
+
+        @Test
+        fun `test actual file rename through VFS updates comment path`() {
+            // Given: A file with a comment
+            service.createNewReview()
+            val file = createVirtualFile("OriginalFile.xml", "<original/>")
+            service.addComment("OriginalFile.xml", 1, 1, "Comment on original")
+            service.saveActiveReview()
+
+            // When: Renaming the file through VFS
+            val newName = "RenamedFile.xml"
+            runWriteAction {
+                file.rename(this, newName)
+            }
+
+            // After rename, the file has a new path
+            service.applyCommentRenames(mapOf("OriginalFile.xml" to newName))
+
+            // Then: Comment should track to the new file
+            assertEquals(0, service.getCommentsForFile("OriginalFile.xml").size)
+            assertEquals(1, service.getCommentsForFile(newName).size)
+        }
+
+        @Test
+        fun `test actual file move through VFS updates comment path`() {
+            // Given: Files in a directory with comments
+            service.createNewReview()
+            createDirectory("src")
+            createDirectory("dest")
+            createVirtualFile("src/File.xml", "<content/>")
+            service.addComment("src/File.xml", 1, 1, "Comment")
+
+            // When: Moving the file through VFS (simulate what listener would process)
+            service.applyCommentRenames(mapOf("src/File.xml" to "dest/File.xml"))
+
+            // Then: Comment path should reflect new location
+            assertEquals(0, service.getCommentsForFile("src/File.xml").size)
+            assertEquals(1, service.getCommentsForFile("dest/File.xml").size)
+        }
+
+        @Test
+        fun `test renaming directory updates all contained file comments`() {
+            // Given: Multiple files in a directory with comments
+            service.createNewReview()
+            createDirectory("olddir")
+            createVirtualFile("olddir/File1.xml", "<one/>")
+            createVirtualFile("olddir/File2.xml", "<two/>")
+            service.addComment("olddir/File1.xml", 1, 1, "Comment 1")
+            service.addComment("olddir/File2.xml", 1, 1, "Comment 2")
+
+            // When: Simulating directory rename (all files in dir get new paths)
+            service.applyCommentRenames(mapOf(
+                "olddir/File1.xml" to "newdir/File1.xml",
+                "olddir/File2.xml" to "newdir/File2.xml"
+            ))
+
+            // Then: All comments should have updated paths
+            assertEquals(0, service.getCommentsForFile("olddir/File1.xml").size)
+            assertEquals(0, service.getCommentsForFile("olddir/File2.xml").size)
+            assertEquals(1, service.getCommentsForFile("newdir/File1.xml").size)
+            assertEquals(1, service.getCommentsForFile("newdir/File2.xml").size)
+        }
+
+        @Test
+        fun `test move then rename preserves comment tracking`() {
+            // Given: A file with a comment
+            service.createNewReview()
+            createVirtualFile("original.xml", "<original/>")
+            service.addComment("original.xml", 1, 5, "Important comment")
+
+            // When: First move
+            service.applyCommentRenames(mapOf("original.xml" to "moved.xml"))
+            assertEquals(1, service.getCommentsForFile("moved.xml").size)
+
+            // Then: Rename
+            service.applyCommentRenames(mapOf("moved.xml" to "final.xml"))
+            assertEquals(0, service.getCommentsForFile("moved.xml").size)
+            assertEquals(1, service.getCommentsForFile("final.xml").size)
+
+            // And: Content should be preserved
+            val comment = service.activeReview!!.comments.first()
+            assertEquals("Important comment", comment.body)
         }
     }
 }

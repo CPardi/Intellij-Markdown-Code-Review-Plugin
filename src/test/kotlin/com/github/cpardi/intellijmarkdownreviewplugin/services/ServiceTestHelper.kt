@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Test utilities specific to service layer testing.
@@ -66,8 +67,9 @@ object ServiceTestHelper {
     fun createReviewChangeListener(): Pair<ReviewChangeListener, ReviewChangeTracker> {
         val tracker = ReviewChangeTracker()
         val listener = object : ReviewChangeListener {
-            override fun onCommentsChanged() {
+            override fun onCommentsChanged(commentId: Int?) {
                 tracker.commentsChanged.set(true)
+                tracker.lastCommentId.set(commentId)
             }
 
             override fun onReviewChanged() {
@@ -96,10 +98,12 @@ object ServiceTestHelper {
     class ReviewChangeTracker {
         val commentsChanged = AtomicBoolean(false)
         val reviewChanged = AtomicBoolean(false)
+        val lastCommentId = AtomicReference<Int?>(null)
 
         fun reset() {
             commentsChanged.set(false)
             reviewChanged.set(false)
+            lastCommentId.set(null)
         }
     }
 }
