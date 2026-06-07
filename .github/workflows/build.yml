@@ -118,6 +118,12 @@ jobs:
           title: Code Coverage
           update-comment: true
 
+      - name: Add Coverage Report to Job Summary
+        uses: madrapps/jacoco-report@v1.8.0
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
         if: ${{ failure() }}
