@@ -1,6 +1,5 @@
 package com.github.cpardi.markdowncodereview.ui
 
-import com.intellij.ide.UiActivity
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -20,7 +19,7 @@ import javax.swing.JPanel
  * A panel with rounded corners and a themed background color.
  * Used for displaying comment items as visually distinct "bubbles".
  */
-class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
+class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(BorderLayout()) {
 
     private val headerLabel = JBLabel()
     private var deleteButton = JButton("Delete")
@@ -42,7 +41,7 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
         // Delete button
         deleteButton.apply {
             toolTipText = "Delete comment"
-            addActionListener { onDelete }
+            addActionListener { onDelete(commentId) }
             background = UNFOCUSED_BORDER_COLOR
             isOpaque = false
         }
@@ -71,14 +70,13 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
         // Wrap in panel with minimum height and border
         val fontMetrics = bodyField.getFontMetrics(bodyField.font)
         val minHeight = fontMetrics.height * 3
-        val defaultBorderColor = CommentBubblePanel.getUnfocusedBorderColor()
         val bodyPanel = object : JBPanel<JBPanel<*>>(BorderLayout()) {
             override fun getPreferredSize(): Dimension {
                 val size = super.getPreferredSize()
                 return Dimension(size.width, maxOf(size.height, minHeight))
             }
         }.apply {
-            border = JBUI.Borders.customLine(defaultBorderColor)
+            border = JBUI.Borders.customLine(UNFOCUSED_BORDER_COLOR)
             add(bodyField, BorderLayout.CENTER)
         }
 
@@ -89,7 +87,7 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
             }
 
             override fun focusLost(e: FocusEvent?) {
-                bodyPanel.border = JBUI.Borders.customLine(defaultBorderColor)
+                bodyPanel.border = JBUI.Borders.customLine(UNFOCUSED_BORDER_COLOR)
             }
         })
 
@@ -109,14 +107,14 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
     var onBodyFocusLost: (e: FocusEvent?) -> Unit = {}
 
     var headerText: String = ""
-        get() { return headerLabel.text }
+        get() = headerLabel.text
         set(value) {
             field = value
             headerLabel.text = value
         }
 
     var bodyText: String = ""
-        get() { return bodyField.text }
+        get() = bodyField.text
         set(value) {
             field = value
             bodyField.text = value
@@ -145,11 +143,13 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
 
             // Draw rounded rectangle background
             g2d.color = BUBBLE_BACKGROUND
-            g2d.fill(RoundRectangle2D.Float(
-                0f, 0f,
-                width.toFloat(), height.toFloat(),
-                ARC_WIDTH, ARC_HEIGHT
-            ))
+            g2d.fill(
+                RoundRectangle2D.Float(
+                    0f, 0f,
+                    width.toFloat(), height.toFloat(),
+                    ARC_WIDTH, ARC_HEIGHT
+                )
+            )
         } finally {
             g2d.dispose()
         }
@@ -161,30 +161,10 @@ class CommentBubblePanel : JBPanel<CommentBubblePanel>(BorderLayout()) {
         private const val ARC_WIDTH = 15f
         private const val ARC_HEIGHT = 15f
 
-        // Theme-aware background colors
+        // Theme-aware colours
         // Light theme: slightly darker than panel background for subtle contrast
         // Dark theme: lighter than panel background (similar to editor background)
-        private val BUBBLE_BACKGROUND = JBColor(
-            Color(0xE8E8E8), // Light theme: light gray
-            Color(0x3C3F41)  // Dark theme: lifted gray (lighter than Darcula's default)
-        )
-
-        // Theme-aware border color for unfocused text editors
-        // More visible than tool window border color
-        private val UNFOCUSED_BORDER_COLOR = JBColor(
-            Color(0xB0B0B0), // Light theme: medium gray
-            Color(0x555555)  // Dark theme: lifted gray
-        )
-
-        /**
-         * Returns the bubble background color for components that need it
-         * (e.g., EditorTextField which requires an explicit background).
-         */
-        fun getBubbleBackground(): JBColor = BUBBLE_BACKGROUND
-
-        /**
-         * Returns the unfocused border color for text editors within the bubble.
-         */
-        fun getUnfocusedBorderColor(): JBColor = UNFOCUSED_BORDER_COLOR
+        val BUBBLE_BACKGROUND = JBColor(Color(0xE8E8E8), Color(0x3C3F41))
+        val UNFOCUSED_BORDER_COLOR = JBColor(Color(0xB0B0B0), Color(0x555555))
     }
 }
