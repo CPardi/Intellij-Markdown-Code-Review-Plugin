@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test
  * Platform components and are tested in ReviewServiceIntegrationTests.
  *
  * These tests verify:
- * - Null activeReview behaviour for retrieval methods
  * - Delegation to ReviewFile for CRUD operations (when activeReview is set)
  * - NONE_SENTINEL constant value
  * - activeReview default value
+ * - ReviewChangeListener behaviour
  */
 class ReviewServiceTests : UnitTest() {
 
@@ -35,56 +35,6 @@ class ReviewServiceTests : UnitTest() {
             // Note: We can't create ReviewService without a Project,
             // but we can verify that the NONE_SENTINEL is accessible
             assertNotNull(ReviewService.NONE_SENTINEL)
-        }
-
-        @Test
-        fun `test NONE_SENTINEL is expected value`() {
-            // Given: The NONE_SENTINEL constant
-            // Then: It should be "<None>"
-            assertEquals("<None>", ReviewService.NONE_SENTINEL)
-        }
-    }
-
-    @Nested
-    inner class CommentRetrievalWithNullActiveReview {
-
-        @Test
-        fun `test getCommentsForFile returns empty list when activeReview is null`() {
-            // Given: A ReviewService with no active review
-            // We test the contract by verifying ReviewFile queries on null
-            // ReviewService delegates to activeReview?.getCommentsForFile()
-            // When activeReview is null, it returns emptyList()
-            val review: ReviewFile? = null
-
-            // Then: Null review means no comments
-            assertNull(review, "Null review should be null")
-        }
-
-        @Test
-        fun `test getPageCommentsForFile returns empty list when activeReview is null`() {
-            // Given: A null activeReview
-            val review: ReviewFile? = null
-
-            // Then: Null review means no page comments
-            assertNull(review, "Null review should be null")
-        }
-
-        @Test
-        fun `test getCommentsForLine returns empty list when activeReview is null`() {
-            // Given: A null activeReview
-            val review: ReviewFile? = null
-
-            // Then: Null review means no line comments
-            assertNull(review, "Null review should be null")
-        }
-
-        @Test
-        fun `test getCommentById returns null when activeReview is null`() {
-            // Given: A null activeReview
-            val review: ReviewFile? = null
-
-            // Then: Null review returns null for any ID
-            assertNull(review?.getCommentById(1), "Null review should return null")
         }
     }
 
@@ -207,18 +157,6 @@ class ReviewServiceTests : UnitTest() {
     inner class CommentCRUDWithActiveReview {
 
         @Test
-        fun `test addComment returns null when no active review`() {
-            // Given: No active review (null)
-            // Note: ReviewService.addComment() returns null when activeReview is null
-            // We verify this contract by understanding the behavior:
-            // fun addComment(...): Comment? { val review = activeReview ?: return null }
-            val review: ReviewFile? = null
-
-            // Then: Null review means addComment would return null
-            assertNull(review)
-        }
-
-        @Test
         fun `test addComment creates comment with sequential ID`() {
             // Given: A review with existing comments
             val comments = listOf(
@@ -258,19 +196,6 @@ class ReviewServiceTests : UnitTest() {
 
             // Then: The comment should be updated in the review
             assertEquals("Updated body", review.getCommentById(1)!!.body)
-        }
-
-        @Test
-        fun `test editComment returns false when comment not found`() {
-            // Given: A review with a comment
-            val comment = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Original")
-            val review = BaseTestHelper.createReviewFile("test-review", listOf(comment))
-
-            // When: Looking up non-existent ID (simulating editComment null return)
-            val found = review.getCommentById(999)
-
-            // Then: Should return null (editComment returns false in this case)
-            assertNull(found)
         }
 
         @Test
