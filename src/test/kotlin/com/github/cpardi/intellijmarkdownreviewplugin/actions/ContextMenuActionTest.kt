@@ -8,12 +8,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent.createEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.invokeAndWaitIfNeeded
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.vfs.VirtualFile
-import java.awt.EventQueue.invokeAndWait
 
 abstract class ContextMenuActionTest : LightPlatformTest() {
 
@@ -22,7 +20,7 @@ abstract class ContextMenuActionTest : LightPlatformTest() {
 
     override fun setUp() {
         super.setUp()
-        service = ReviewService.Companion.getInstance(project)
+        service = ReviewService.getInstance(project)
         service.setActiveReview(null)
     }
 
@@ -50,7 +48,7 @@ abstract class ContextMenuActionTest : LightPlatformTest() {
             }
         }
 
-        return createEvent(dataContext, null, "test", ActionUiKind.NONE, null);
+        return createEvent(dataContext, null, "test", ActionUiKind.NONE, null)
     }
 
 
@@ -68,7 +66,7 @@ abstract class ContextMenuActionTest : LightPlatformTest() {
             }
         }
 
-        return createEvent(dataContext, null, "test", ActionUiKind.NONE, null);
+        return createEvent(dataContext, null, "test", ActionUiKind.NONE, null)
     }
 
     override fun tearDown() {

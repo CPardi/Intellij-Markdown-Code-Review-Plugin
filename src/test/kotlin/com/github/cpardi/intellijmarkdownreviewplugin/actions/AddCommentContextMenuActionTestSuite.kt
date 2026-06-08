@@ -1,12 +1,9 @@
 package com.github.cpardi.intellijmarkdownreviewplugin.actions
 
-import com.intellij.openapi.application.backgroundWriteAction
 import com.intellij.openapi.application.invokeAndWaitIfNeeded
-import com.intellij.openapi.application.runReadAction
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.awt.EventQueue.invokeAndWait
 
 
 /**

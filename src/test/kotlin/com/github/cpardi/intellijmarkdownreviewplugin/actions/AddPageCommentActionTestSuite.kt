@@ -1,11 +1,5 @@
 package com.github.cpardi.intellijmarkdownreviewplugin.actions
 
-import com.github.cpardi.intellijmarkdownreviewplugin.LightPlatformTest
-import com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService
-import com.intellij.openapi.actionSystem.ActionUiKind
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.AnActionEvent.createEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.invokeAndWaitIfNeeded
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
