@@ -16,13 +16,13 @@ import com.intellij.openapi.vfs.VirtualFileManager
  */
 class ReviewStartupActivity : ProjectActivity {
 
-    private val LOG = thisLogger()
+    private val logger = thisLogger()
 
     override suspend fun execute(project: Project) {
-        LOG.info("Initializing Review Markdown Generator for project: ${project.name}")
+        logger.info("Initializing Review Markdown Generator for project: ${project.name}")
 
         // Initialize the service (this creates the instance)
-        val service = ReviewService.getInstance(project)
+        ReviewService.getInstance(project)
 
         // Register document change listener
         val editorFactory = EditorFactory.getInstance()
@@ -37,6 +37,6 @@ class ReviewStartupActivity : ProjectActivity {
         // Initialize range highlighter for comment background highlights
         CommentRangeHighlighter(project)
 
-        LOG.info("Review Markdown Generator initialized successfully")
+        logger.info("Review Markdown Generator initialized successfully")
     }
 }

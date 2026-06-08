@@ -29,7 +29,7 @@ class ReviewServiceTests : UnitTest() {
         fun `test activeReview is null by default`() {
             // Given: A fresh ReviewService concept (we verify the contract)
             // When: Creating a ReviewFile with no comments
-            val review = BaseTestHelper.createReviewFile("test")
+            BaseTestHelper.createReviewFile("test")
 
             // Then: The ReviewFile should exist with expected properties
             // Note: We can't create ReviewService without a Project,

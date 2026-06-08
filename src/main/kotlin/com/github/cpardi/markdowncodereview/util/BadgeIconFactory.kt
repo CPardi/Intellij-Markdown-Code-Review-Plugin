@@ -20,7 +20,6 @@ object BadgeIconFactory {
 
     private const val BADGE_SIZE = 9.0f
     private const val MAX_DISPLAY_COUNT = 9
-    private const val BASE_ICON_SIZE = 12
 
     // Cache for badge icons by count (2-9, overflow)
     private val iconCache = mutableMapOf<Int, Icon>()

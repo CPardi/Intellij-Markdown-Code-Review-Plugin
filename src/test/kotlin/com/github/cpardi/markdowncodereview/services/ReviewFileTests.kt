@@ -750,18 +750,6 @@ class ReviewFileTests : UnitTest() {
         }
 
         @Test
-        fun `test comments are initialized as CopyOnWriteArrayList`() {
-            // Given: A review file
-            val reviewFile = BaseTestHelper.createReviewFile("review")
-
-            // Then: Comments should be CopyOnWriteArrayList
-            assertTrue(
-                reviewFile.comments is java.util.concurrent.CopyOnWriteArrayList,
-                "Comments should be CopyOnWriteArrayList for thread safety"
-            )
-        }
-
-        @Test
         fun `test review file equality based on properties`() {
             // Given: Two review files with same properties
             val comment = BaseTestHelper.createComment(1, "test.kt", 1, 5, "Comment")

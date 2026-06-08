@@ -8,7 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Parser for review markdown files.
+ * Parser for review Markdown files.
  * Parses `reviews/<name>.md` files into `ReviewFile` objects.
  */
 object ReviewFileParser {
@@ -16,10 +16,10 @@ object ReviewFileParser {
     private val LOG = thisLogger()
 
     // Header pattern for line comments: @[<relative-path>:<start-line>:<end-line>]:
-    private val HEADER_REGEX = Regex("""^@\[(.+):(\d+):(\d+)\]:""")
+    private val HEADER_REGEX = Regex("""^@\[(.+):(\d+):(\d+)]:""")
 
     // Header pattern for page comments: @[<relative-path>]:
-    private val PAGE_HEADER_REGEX = Regex("""^@\[(.+)\]:""")
+    private val PAGE_HEADER_REGEX = Regex("""^@\[(.+)]:""")
 
     /**
      * Parses a review file from a VirtualFile.
@@ -54,13 +54,11 @@ object ReviewFileParser {
             val postamble = StringBuilder()
 
             var currentLineIndex = 0
-            var foundFirstHeader = false
 
             // Extract preamble (text before first header)
             while (currentLineIndex < lines.size) {
                 val line = lines[currentLineIndex]
                 if (HEADER_REGEX.matches(line) || PAGE_HEADER_REGEX.matches(line)) {
-                    foundFirstHeader = true
                     break
                 }
                 if (preamble.isNotEmpty()) {
