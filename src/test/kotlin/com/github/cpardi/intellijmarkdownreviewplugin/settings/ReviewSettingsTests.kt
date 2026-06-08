@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @Suppress("JUnitMixedFramework")
-object ReviewSettingsTestSuite {
+class ReviewSettingsTestSuite {
 
     /**
      * Tests default values, setter/getter behavior, change notifications, and state management.
@@ -26,7 +26,8 @@ object ReviewSettingsTestSuite {
         }
     }
 
-    class DefaultValues : ReviewSettingsTests() {
+    @Nested
+    inner class DefaultValues : ReviewSettingsTests() {
 
         @Test
         fun `test reviewsDir default is reviews`() {
@@ -63,7 +64,8 @@ object ReviewSettingsTestSuite {
         }
     }
 
-    class SetterGetter : ReviewSettingsTests() {
+    @Nested
+    inner class SetterGetter : ReviewSettingsTests() {
 
         @Test
         fun `test setter updates state value`() {
@@ -120,7 +122,8 @@ object ReviewSettingsTestSuite {
         }
     }
 
-    class SettingsChangeNotification : ReviewSettingsTests() {
+    @Nested
+    inner class SettingsChangeNotification : ReviewSettingsTests() {
 
         @Test
         fun `test listener receives notification when value changes`() {
@@ -199,7 +202,8 @@ object ReviewSettingsTestSuite {
         }
     }
 
-    class StateManagement : ReviewSettingsTests() {
+    @Nested
+    inner class StateManagement : ReviewSettingsTests() {
 
         @Test
         fun `test State default reviewsDir is reviews`() {

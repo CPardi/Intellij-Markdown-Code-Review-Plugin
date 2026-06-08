@@ -48,7 +48,6 @@ class AddCommentContextMenuAction : AnAction() {
         val project = e.project
         val editor = e.getData(CommonDataKeys.EDITOR)
         val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        val service = project?.let { ReviewService.getInstance(it) }
 
         // Always show in context menu when there's a project and editor
         e.presentation.isEnabled = project != null && editor != null && virtualFile != null

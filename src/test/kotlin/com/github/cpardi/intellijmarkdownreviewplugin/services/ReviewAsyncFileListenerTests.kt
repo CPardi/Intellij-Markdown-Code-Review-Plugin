@@ -1,10 +1,11 @@
 package com.github.cpardi.intellijmarkdownreviewplugin.services
 
 import com.github.cpardi.intellijmarkdownreviewplugin.LightPlatformTest
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @Suppress("JUnitMixedFramework")
-object ReviewAsyncFileListenerTestSuite {
+class ReviewAsyncFileListenerTestSuite {
 
     /**
      * Tests file rename and move tracking through the batch path update mechanism.
@@ -24,7 +25,8 @@ object ReviewAsyncFileListenerTestSuite {
         }
     }
 
-    class CommentPathUpdates : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class CommentPathUpdates : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test applyCommentRenames updates single file path`() {
@@ -103,7 +105,8 @@ object ReviewAsyncFileListenerTestSuite {
         }
     }
 
-    class DirectoryRenameHandling : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class DirectoryRenameHandling : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test directory rename updates all nested comment paths`() {
@@ -170,7 +173,8 @@ object ReviewAsyncFileListenerTestSuite {
         }
     }
 
-    class BatchRenames : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class BatchRenames : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test multiple renames in single batch`() {
@@ -217,7 +221,8 @@ object ReviewAsyncFileListenerTestSuite {
         }
     }
 
-    class EdgeCases : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class EdgeCases : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test rename with no active review does not throw`() {
@@ -291,7 +296,8 @@ object ReviewAsyncFileListenerTestSuite {
         }
     }
 
-    class IntegrationScenarios : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class IntegrationScenarios : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test complete rename workflow persists to disk`() {
@@ -359,7 +365,8 @@ object ReviewAsyncFileListenerTestSuite {
      * Integration tests simulating actual VFS rename operations.
      * These test the complete workflow from VFS event to comment update.
      */
-    class VfsRenameWorkflow : ReviewAsyncFileListenerTests() {
+    @Nested
+    inner class VfsRenameWorkflow : ReviewAsyncFileListenerTests() {
 
         @Test
         fun `test actual file rename through VFS updates comment path`() {

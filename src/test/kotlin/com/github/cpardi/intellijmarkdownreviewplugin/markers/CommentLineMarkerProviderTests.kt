@@ -10,10 +10,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @Suppress("JUnitMixedFramework")
-object CommentLineMarkerProviderTestSuite {
+class CommentLineMarkerProviderTestSuite {
 
     /**
      * Base class for integration tests of CommentLineMarkerProvider.
@@ -38,7 +39,8 @@ object CommentLineMarkerProviderTestSuite {
         </xml>
     """.trimIndent()
 
-    class CollectSlowLineMarkers : CommentLineMarkerProviderTests() {
+    @Nested
+    inner class CollectSlowLineMarkers : CommentLineMarkerProviderTests() {
 
         @Test
         fun `test no markers when no active review`() {
@@ -153,7 +155,8 @@ object CommentLineMarkerProviderTestSuite {
         }
     }
 
-    class EdgeCases : CommentLineMarkerProviderTests() {
+    @Nested
+    inner class EdgeCases : CommentLineMarkerProviderTests() {
 
         @Test
         fun `test handles empty file gracefully`() {
