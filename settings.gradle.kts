@@ -1,6 +1,6 @@
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 
-rootProject.name = "Markdown Review Plugin"
+rootProject.name = "Markdown Code Review"
 
 pluginManagement {
     plugins {
