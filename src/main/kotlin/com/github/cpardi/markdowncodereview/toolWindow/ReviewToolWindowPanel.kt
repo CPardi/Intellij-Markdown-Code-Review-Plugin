@@ -6,7 +6,7 @@ import com.github.cpardi.markdowncodereview.services.ReviewChangeListener
 import com.github.cpardi.markdowncodereview.services.ReviewService
 import com.github.cpardi.markdowncodereview.settings.ReviewSettings
 import com.github.cpardi.markdowncodereview.settings.SettingsChangeListener
-import com.github.cpardi.markdowncodereview.ui.CommentBubblePanel
+import com.github.cpardi.markdowncodereview.ui.CommentBubble
 import com.intellij.filename.UniqueNameBuilder
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.LogicalPosition
@@ -32,7 +32,7 @@ import javax.swing.*
 class ReviewToolWindowPanel(private val project: Project, private val service: ReviewService) : JBPanel<ReviewToolWindowPanel>(BorderLayout()) {
 
     private var isUpdatingSelection = false
-    private val commentPanelMap = mutableMapOf<Int, CommentBubblePanel>()
+    private val commentPanelMap = mutableMapOf<Int, CommentBubble>()
 
     private val fileEditorManager get() = FileEditorManager.getInstance(project)
 
@@ -203,8 +203,8 @@ class ReviewToolWindowPanel(private val project: Project, private val service: R
     }
 
     private fun refreshAllComments() {
-        fun createCommentItem(comment: Comment, displayPath: String): CommentBubblePanel {
-            return CommentBubblePanel(comment.id).apply {
+        fun createCommentItem(comment: Comment, displayPath: String): CommentBubble {
+            return CommentBubble(comment.id).apply {
                 border = JBUI.Borders.empty(10, 12, 10, 12)
 
                 // Header

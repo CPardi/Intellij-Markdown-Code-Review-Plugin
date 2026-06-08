@@ -69,7 +69,7 @@
 - If unit tests are becoming cumbersome, consider splitting definitions into smaller "units"
 - If code covered by unit tests, then do not write smoke tests
 - If private fields need to be queried or manipulated, then make them public. Do not use reflection.
-- When writing Light Platform tests follow the pattern used in src/test/kotlin/com/github/cpardi/intellijmarkdownreviewplugin/ui/ReviewToolWindowPanelTestSuite.kt
+- When writing Light Platform tests follow the pattern used in src/test/kotlin/com/github/cpardi/markdowncodereview/ui/ReviewToolWindowPanelTestSuite.kt
 - Use XML files as virtual files for testing with inline XML snippets in test code
 - Only check logic in UI tests, not static UI construction
 - Use parameterized tests when multiple test methods share identical setup, execution, and assertions with only input values differing.

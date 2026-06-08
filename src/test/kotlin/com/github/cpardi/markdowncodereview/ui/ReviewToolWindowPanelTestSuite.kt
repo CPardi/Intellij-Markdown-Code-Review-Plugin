@@ -86,7 +86,7 @@ class ReviewToolWindowPanelTestSuite {
             panel.reviewComboBox.selectedItem = reviewName
 
             // Then: Two review comment bubbles are shown
-            val commentBubbles = panel.commentsPanel.components.filterIsInstance<CommentBubblePanel>()
+            val commentBubbles = panel.commentsPanel.components.filterIsInstance<CommentBubble>()
             Assertions.assertEquals(2, commentBubbles.size, "One bubble per comment should be displayed")
         }
     }
@@ -159,7 +159,7 @@ class ReviewToolWindowPanelTestSuite {
             panel.reviewComboBox.selectedItem = reviewName
 
             // When: Comment body is edited
-            val commentBubble = panel.commentsPanel.components.filterIsInstance<CommentBubblePanel>().first()
+            val commentBubble = panel.commentsPanel.components.filterIsInstance<CommentBubble>().first()
             commentBubble.bodyText = "Edited comment"
 
             // Then: Comment in service should still have original (not saved yet)
@@ -188,7 +188,7 @@ class ReviewToolWindowPanelTestSuite {
             // Then: Wait for async UI update and verify the edit
             flushPendingUiUpdates()
 
-            val commentBubbles = panel.commentsPanel.components.filterIsInstance<CommentBubblePanel>()
+            val commentBubbles = panel.commentsPanel.components.filterIsInstance<CommentBubble>()
             Assertions.assertEquals("Edited first comment", commentBubbles.first().bodyText, "First comment should be updated")
             Assertions.assertEquals("Second comment", commentBubbles[1].bodyText, "Second comment should remain unchanged")
         }

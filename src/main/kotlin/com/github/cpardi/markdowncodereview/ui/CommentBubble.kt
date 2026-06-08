@@ -16,17 +16,23 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
- * A panel with rounded corners and a themed background color.
+ * A component with rounded corners and a themed background color.
  * Used for displaying comment items as visually distinct "bubbles".
  */
-class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(BorderLayout()) {
+class CommentBubble(val commentId: Int) : JComponent() {
 
-    private val headerLabel = JBLabel()
-    private var deleteButton = JButton("Delete")
-    private val bodyField = JBTextArea()
+    internal val headerLabel = JBLabel()
+    internal var deleteButton = JButton("Delete")
+    internal val bodyField = JBTextArea()
+
+    private val contentPanel = JBPanel<JBPanel<*>>(BorderLayout())
 
     init {
         isOpaque = false
+        layout = BorderLayout()
+
+        contentPanel.apply { isOpaque = false }
+        add(contentPanel, BorderLayout.CENTER)
 
         headerLabel.apply {
             toolTipText = "Click to navigate"
@@ -42,7 +48,6 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
         deleteButton.apply {
             toolTipText = "Delete comment"
             addActionListener { onDelete(commentId) }
-            background = UNFOCUSED_BORDER_COLOR
             isOpaque = false
         }
 
@@ -54,11 +59,12 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
 
         // Layout
         val topPanel = JPanel(BorderLayout()).apply {
+            isOpaque = false
             add(headerLabel, BorderLayout.WEST)
             add(buttonPanel, BorderLayout.EAST)
         }
 
-        add(topPanel, BorderLayout.NORTH)
+        contentPanel.add(topPanel, BorderLayout.NORTH)
 
         // Comment body text field
         bodyField.apply {
@@ -76,6 +82,7 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
                 return Dimension(size.width, maxOf(size.height, minHeight))
             }
         }.apply {
+            isOpaque = false
             border = JBUI.Borders.customLine(UNFOCUSED_BORDER_COLOR)
             add(bodyField, BorderLayout.CENTER)
         }
@@ -91,7 +98,6 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
             }
         })
 
-
         // Save body on focus lost
         bodyField.addFocusListener(object : FocusAdapter() {
             override fun focusLost(e: FocusEvent?) {
@@ -99,7 +105,7 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
             }
         })
 
-        add(bodyPanel, BorderLayout.CENTER)
+        contentPanel.add(bodyPanel, BorderLayout.CENTER)
     }
 
     var onHeaderClick: () -> Unit = {}
@@ -123,15 +129,6 @@ class CommentBubblePanel(val commentId: Int) : JBPanel<CommentBubblePanel>(Borde
     override fun getMaximumSize(): Dimension {
         val preferred = preferredSize
         return Dimension(Integer.MAX_VALUE, preferred.height)
-    }
-
-    override fun addImpl(comp: Component?, constraints: Any?, index: Int) {
-        // Make JPanel children transparent so bubble background shows through
-        if (comp is JComponent) {
-            comp.isOpaque = false
-        }
-
-        super.addImpl(comp, constraints, index)
     }
 
     override fun paintComponent(g: Graphics) {
