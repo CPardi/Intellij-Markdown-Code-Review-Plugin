@@ -1,8 +1,7 @@
 package com.github.cpardi.markdowncodereview.ui
 
-import com.intellij.openapi.project.Project
 import com.github.cpardi.markdowncodereview.ReviewBundle
-import com.github.cpardi.markdowncodereview.services.ReviewService
+import com.intellij.openapi.project.Project
 
 /**
  * Dialog for creating a new comment.

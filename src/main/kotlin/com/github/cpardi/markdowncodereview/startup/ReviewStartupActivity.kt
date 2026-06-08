@@ -1,14 +1,14 @@
 package com.github.cpardi.markdowncodereview.startup
 
+import com.github.cpardi.markdowncodereview.markers.CommentRangeHighlighter
+import com.github.cpardi.markdowncodereview.services.DocumentChangeListener
+import com.github.cpardi.markdowncodereview.services.ReviewAsyncFileListener
+import com.github.cpardi.markdowncodereview.services.ReviewService
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.github.cpardi.markdowncodereview.markers.CommentRangeHighlighter
-import com.github.cpardi.markdowncodereview.services.DocumentChangeListener
-import com.github.cpardi.markdowncodereview.services.ReviewAsyncFileListener
-import com.github.cpardi.markdowncodereview.services.ReviewService
 
 /**
  * Startup activity that initializes the review system.

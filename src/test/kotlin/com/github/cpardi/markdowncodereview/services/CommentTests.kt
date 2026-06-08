@@ -1,9 +1,7 @@
 package com.github.cpardi.markdowncodereview.services
 
 import com.github.cpardi.markdowncodereview.UnitTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class CommentTests : UnitTest() {

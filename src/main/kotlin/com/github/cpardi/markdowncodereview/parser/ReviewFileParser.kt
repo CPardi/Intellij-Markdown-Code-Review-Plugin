@@ -1,10 +1,10 @@
 package com.github.cpardi.markdowncodereview.parser
 
-import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.vfs.VirtualFile
 import com.github.cpardi.markdowncodereview.services.Comment
 import com.github.cpardi.markdowncodereview.services.ReviewFile
 import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.vfs.VirtualFile
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**

@@ -1,11 +1,11 @@
 package com.github.cpardi.markdowncodereview.parser
 
+import com.github.cpardi.markdowncodereview.services.Comment
+import com.github.cpardi.markdowncodereview.services.ReviewFile
+import com.github.cpardi.markdowncodereview.settings.ReviewSettings
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.github.cpardi.markdowncodereview.services.Comment
-import com.github.cpardi.markdowncodereview.settings.ReviewSettings
-import com.github.cpardi.markdowncodereview.services.ReviewFile
 
 /**
  * Writer for review markdown files.

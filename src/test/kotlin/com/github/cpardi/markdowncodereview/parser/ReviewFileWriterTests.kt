@@ -2,9 +2,7 @@ package com.github.cpardi.markdowncodereview.parser
 
 import com.github.cpardi.markdowncodereview.BaseTestHelper
 import com.github.cpardi.markdowncodereview.UnitTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

@@ -1,11 +1,11 @@
 package com.github.cpardi.markdowncodereview.ui
 
+import com.github.cpardi.markdowncodereview.ReviewBundle
+import com.github.cpardi.markdowncodereview.services.ReviewService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
-import com.github.cpardi.markdowncodereview.ReviewBundle
-import com.github.cpardi.markdowncodereview.services.ReviewService
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JComponent

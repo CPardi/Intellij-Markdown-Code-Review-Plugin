@@ -1,5 +1,9 @@
 package com.github.cpardi.markdowncodereview.markers
 
+import com.github.cpardi.markdowncodereview.services.Comment
+import com.github.cpardi.markdowncodereview.services.ReviewService
+import com.github.cpardi.markdowncodereview.ui.EditCommentsDialog
+import com.github.cpardi.markdowncodereview.util.BadgeIconFactory
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProvider
 import com.intellij.icons.AllIcons
@@ -7,12 +11,8 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
-import com.github.cpardi.markdowncodereview.services.Comment
-import com.github.cpardi.markdowncodereview.services.ReviewService
-import com.github.cpardi.markdowncodereview.ui.EditCommentsDialog
-import com.github.cpardi.markdowncodereview.util.BadgeIconFactory
 import com.intellij.psi.PsiCodeFragment
+import com.intellij.psi.PsiElement
 
 /**
  * Provides gutter icons for lines with comments.

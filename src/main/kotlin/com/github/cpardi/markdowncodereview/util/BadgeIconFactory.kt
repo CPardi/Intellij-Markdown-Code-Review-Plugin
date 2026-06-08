@@ -6,7 +6,6 @@ import com.intellij.ui.LayeredIcon
 import com.intellij.util.ui.ImageUtil
 import java.awt.Color
 import java.awt.Font
-import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage

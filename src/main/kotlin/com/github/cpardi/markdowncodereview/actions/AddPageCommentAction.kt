@@ -1,13 +1,13 @@
 package com.github.cpardi.markdowncodereview.actions
 
+import com.github.cpardi.markdowncodereview.ReviewBundle
+import com.github.cpardi.markdowncodereview.services.ReviewService
+import com.github.cpardi.markdowncodereview.ui.NewPageCommentDialog
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.vfs.VirtualFile
-import com.github.cpardi.markdowncodereview.ReviewBundle
-import com.github.cpardi.markdowncodereview.services.ReviewService
-import com.github.cpardi.markdowncodereview.ui.NewPageCommentDialog
 
 /**
  * Action for "Add Page Comment" in the editor context menu or Project View context menu.

@@ -1,8 +1,8 @@
 package com.github.cpardi.markdowncodereview.services
 
+import com.github.cpardi.markdowncodereview.ReviewBundle
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.github.cpardi.markdowncodereview.ReviewBundle
 
 /**
  * Represents the result of creating a new review.

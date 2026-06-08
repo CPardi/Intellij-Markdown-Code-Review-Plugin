@@ -1,10 +1,10 @@
 package com.github.cpardi.markdowncodereview.actions
 
+import com.github.cpardi.markdowncodereview.services.ReviewService
+import com.github.cpardi.markdowncodereview.ui.NewCommentDialog
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.github.cpardi.markdowncodereview.services.ReviewService
-import com.github.cpardi.markdowncodereview.ui.NewCommentDialog
 
 /**
  * Action for "Add Review Comment" in the editor context menu.
