@@ -1,4 +1,12 @@
+import org.commonmark.parser.Parser
+import org.gradle.kotlin.dsl.invoke
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
+buildscript {
+    dependencies {
+        classpath("org.commonmark:commonmark:0.22.0")
+    }
+}
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -59,5 +67,21 @@ tasks {
             "-Xmx1g",
             "-XX:+HeapDumpOnOutOfMemoryError"
         )
+    }
+
+    patchPluginXml {
+        sinceBuild = providers.gradleProperty("pluginSinceBuild")
+        untilBuild = null
+
+        pluginDescription = provider {
+            val descriptionFile = layout.projectDirectory.file("DESCRIPTION.md").asFile
+            val markdown = descriptionFile.readText()
+
+            val parser = Parser.builder().build()
+            val document = parser.parse(markdown)
+            val renderer = org.commonmark.renderer.html.HtmlRenderer.builder().build()
+
+            renderer.render(document)
+        }
     }
 }

@@ -2,22 +2,9 @@
 <idea-plugin>
     <id>com.github.cpardi.markdowncodereview</id>
     <name>Markdown Code Review</name>
-    <vendor>CPardi</vendor>
-    <description><![CDATA[
-        <p><b>Review Markdown Plugin</b> enables users to create code review comments in the IDE and generates a Markdown document for AI agents to process.</p>
-        <p>Features:</p>
-        <ul>
-            <li>Create and manage multiple review files</li>
-            <li>Add comments to specific code sections via gutter icons or context menu</li>
-            <li>Generate AI-friendly Markdown output for code reviews</li>
-            <li>Track file renames and moves automatically</li>
-        </ul>
-    ]]></description>
-
+    <vendor url="https://github.com/CPardi">CPardi</vendor>
     <depends>com.intellij.modules.platform</depends>
-
     <resource-bundle>messages.ReviewBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
         <!-- Application-level service for settings -->
         <applicationService serviceImplementation="com.github.cpardi.markdowncodereview.settings.ReviewSettings"/>
@@ -47,9 +34,8 @@
     </extensions>
 
     <actions>
-        <group id="ReviewMarkdownGenerator.ReviewGroup" text="Review" popup="true">
+        <group id="ReviewMarkdownGenerator.ReviewGroup" text="Review" popup="true" icon="AllIcons.Toolwindows.ToolWindowInspection">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
 
             <action id="ReviewMarkdownGenerator.AddCommentContextMenu"
                     class="com.github.cpardi.markdowncodereview.actions.AddCommentContextMenuAction"
@@ -70,9 +56,9 @@
             <action id="ReviewMarkdownGenerator.AddPageComment"
                     class="com.github.cpardi.markdowncodereview.actions.AddPageCommentAction"
                     text="Add Page Comment">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl J" second-keystroke="L"/>
-                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta J" second-keystroke="L"/>
-                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta J" second-keystroke="L"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl K" second-keystroke="L"/>
+                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta K" second-keystroke="L"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta K" second-keystroke="L"/>
             </action>
 
             <separator/>
