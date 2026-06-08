@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.cpardi.intellijmarkdownreviewplugin</id>
+    <id>com.github.cpardi.markdowncodereview</id>
     <name>Markdown Code Review</name>
     <vendor>CPardi</vendor>
     <description><![CDATA[
@@ -20,29 +20,29 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Application-level service for settings -->
-        <applicationService serviceImplementation="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettings"/>
+        <applicationService serviceImplementation="com.github.cpardi.markdowncodereview.settings.ReviewSettings"/>
 
         <!-- Project-level service -->
-        <projectService serviceImplementation="com.github.cpardi.intellijmarkdownreviewplugin.services.ReviewService"/>
+        <projectService serviceImplementation="com.github.cpardi.markdowncodereview.services.ReviewService"/>
 
         <!-- Application-level settings configurable -->
         <applicationConfigurable parentId="tools"
-                                 instance="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettingsConfigurable"
-                                 id="com.github.cpardi.intellijmarkdownreviewplugin.settings.ReviewSettingsConfigurable"
+                                 instance="com.github.cpardi.markdowncodereview.settings.ReviewSettingsConfigurable"
+                                 id="com.github.cpardi.markdowncodereview.settings.ReviewSettingsConfigurable"
                                  key="settings.displayName"
                                  bundle="messages.ReviewBundle"/>
 
         <!-- Tool window -->
         <toolWindow id="Review Output"
-                    factoryClass="com.github.cpardi.intellijmarkdownreviewplugin.toolWindow.ReviewToolWindowFactory"
+                    factoryClass="com.github.cpardi.markdowncodereview.toolWindow.ReviewToolWindowFactory"
                     anchor="right"
                     icon="AllIcons.Toolwindows.ToolWindowInspection"/>
 
         <!-- Startup activity -->
-        <postStartupActivity implementation="com.github.cpardi.intellijmarkdownreviewplugin.startup.ReviewStartupActivity"/>
+        <postStartupActivity implementation="com.github.cpardi.markdowncodereview.startup.ReviewStartupActivity"/>
 
         <!-- Gutter icon line marker provider -->
-        <codeInsight.lineMarkerProvider implementationClass="com.github.cpardi.intellijmarkdownreviewplugin.markers.CommentLineMarkerProvider"
+        <codeInsight.lineMarkerProvider implementationClass="com.github.cpardi.markdowncodereview.markers.CommentLineMarkerProvider"
                 language=""/>
     </extensions>
 
@@ -52,11 +52,11 @@
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
 
             <action id="ReviewMarkdownGenerator.AddCommentContextMenu"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddCommentContextMenuAction"
+                    class="com.github.cpardi.markdowncodereview.actions.AddCommentContextMenuAction"
                     text="Add Comment"/>
 
             <action id="ReviewMarkdownGenerator.AddOrEditComment"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddOrEditCommentAction"
+                    class="com.github.cpardi.markdowncodereview.actions.AddOrEditCommentAction"
                     text="Add or Edit Comment">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl R"/>
                 <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta R"/>
@@ -64,7 +64,7 @@
             </action>
 
             <action id="ReviewMarkdownGenerator.AddPageComment"
-                    class="com.github.cpardi.intellijmarkdownreviewplugin.actions.AddPageCommentAction"
+                    class="com.github.cpardi.markdowncodereview.actions.AddPageCommentAction"
                     text="Add Page Comment">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl shift R"/>
                 <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta shift R"/>
