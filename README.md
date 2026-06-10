@@ -4,8 +4,6 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
-## Overview
-
 ![demo.gif](graphics/demo.gif)
 
 An IntelliJ Platform plugin that enables users to create code review comments in the IDE and generates Markdown output for people or AI agents to read.
