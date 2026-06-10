@@ -1,0 +1,138 @@
+# GitHub Actions Workflow created for handling the publish process based on the draft release prepared with the Release workflow.
+# This workflow is triggered manually via workflow_dispatch and handles:
+# - Publishing the plugin to JetBrains Marketplace
+# - Converting the draft release to a published release
+# - Creating a PR for changelog updates
+#
+# Running the publishPlugin task requires all the following secrets to be provided:
+# PUBLISH_TOKEN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD, CERTIFICATE_CHAIN.
+# See https://plugins.jetbrains.com/docs/intellij/plugin-signing.html for more information.
+
+name: Publish
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to publish (e.g., 1.0.0). Leave empty to use latest draft release.'
+        required: false
+        default: ''
+
+jobs:
+
+  # Publish the plugin to JetBrains Marketplace and convert draft to published release
+  publish:
+    name: Publish Plugin
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v6
+
+      # Set up build environment with read-only cache
+      - name: Setup Build Environment
+        uses: ./.github/workflows/actions/setup-build-environment
+        with:
+          cache-read-only: true
+
+      # Determine the version to publish
+      - name: Get Version
+        id: get_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            # Find the latest draft release
+            VERSION=$(gh api repos/{owner}/{repo}/releases \
+              --jq '.[] | select(.draft == true) | .tag_name' \
+              | head -n 1)
+            if [ -z "$VERSION" ]; then
+              echo "Error: No draft release found. Please create a draft release first using the Release workflow."
+              exit 1
+            fi
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version to publish: $VERSION"
+
+      # Check out at the release tag (overrides the default checkout from composite action)
+      - name: Fetch Sources at Tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.get_version.outputs.version }}
+
+      # Get release notes for changelog patching
+      - name: Get Release Notes
+        id: release_notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_BODY=$(gh release view ${{ steps.get_version.outputs.version }} --json body --jq '.body')
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Update the Unreleased section with the current release note
+      - name: Patch Changelog
+        if: ${{ steps.release_notes.outputs.body != '' }}
+        env:
+          CHANGELOG: ${{ steps.release_notes.outputs.body }}
+        run: |
+          RELEASE_NOTE="./build/tmp/release_note.txt"
+          mkdir -p "$(dirname "$RELEASE_NOTE")"
+          echo "$CHANGELOG" > $RELEASE_NOTE
+
+          ./gradlew patchChangelog --release-note-file=$RELEASE_NOTE
+
+      # Publish the plugin to JetBrains Marketplace
+      - name: Publish Plugin
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: ./gradlew publishPlugin
+
+      # Convert draft release to published release
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit ${{ steps.get_version.outputs.version }} --draft=false
+
+      # Upload an artifact as a release asset
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ steps.get_version.outputs.version }} ./build/distributions/*
+
+      # Create a pull request
+      - name: Create Pull Request
+        if: ${{ steps.release_notes.outputs.body != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          BRANCH="changelog-update-$VERSION"
+          LABEL="release changelog"
+
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+          git checkout -b $BRANCH
+          git commit -am "Changelog update - $VERSION"
+          git push --set-upstream origin $BRANCH
+
+          gh label create "$LABEL" \
+            --description "Pull requests with release changelog update" \
+            --force \
+            || true
+
+          gh pr create \
+            --title "Changelog update - \`$VERSION\`" \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
+            --label "$LABEL" \
+            --head $BRANCH
