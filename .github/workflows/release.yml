@@ -38,7 +38,7 @@ jobs:
 
       # Download the plugin artifact from the completed Build workflow
       - name: Download Plugin Artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: plugin-distribution
           path: ./build/distributions
