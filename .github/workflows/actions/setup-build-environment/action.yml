@@ -6,10 +6,6 @@ inputs:
     description: 'Whether to configure Gradle cache as read-only (prevents cache updates)'
     required: false
     default: 'false'
-  ref:
-    description: 'Git reference to checkout (branch, tag, or SHA). Leave empty for default branch.'
-    required: false
-    default: ''
 
 runs:
   using: 'composite'
@@ -19,11 +15,6 @@ runs:
       with:
         tool-cache: false
         large-packages: false
-
-    - name: Fetch Sources
-      uses: actions/checkout@v6
-      with:
-        ref: ${{ inputs.ref }}
 
     - name: Setup Java
       uses: actions/setup-java@v5

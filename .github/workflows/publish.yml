@@ -27,6 +27,8 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v6
 
       # Set up build environment with read-only cache
       - name: Setup Build Environment
