@@ -88,7 +88,8 @@ jobs:
           ./gradlew patchChangelog --release-note-file=$RELEASE_NOTE
 
       # Publish the plugin to JetBrains Marketplace
-      - name: Publish Plugin
+      - name: Publish Plugin to JetBrains Marketplace
+        if: ${{ secrets.PUBLISH_TOKEN != '' }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
@@ -96,8 +97,13 @@ jobs:
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
         run: ./gradlew publishPlugin
 
+      - name: Warn about missing PUBLISH_TOKEN
+        if: ${{ secrets.PUBLISH_TOKEN == '' }}
+        run: |
+          echo "::warning::PUBLISH_TOKEN secret is not set. Plugin was not published to JetBrains Marketplace."
+
       # Convert draft release to published release
-      - name: Publish Release
+      - name: Publish Release on Github Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
