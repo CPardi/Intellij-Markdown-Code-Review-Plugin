@@ -2,7 +2,6 @@
 # This workflow is triggered manually via workflow_dispatch and handles:
 # - Publishing the plugin to JetBrains Marketplace
 # - Converting the draft release to a published release
-# - Creating a PR for changelog updates
 #
 # Running the publishPlugin task requires all the following secrets to be provided:
 # PUBLISH_TOKEN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD, CERTIFICATE_CHAIN.
@@ -25,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v6
@@ -64,29 +62,6 @@ jobs:
         with:
           ref: ${{ steps.get_version.outputs.version }}
 
-      # Get release notes for changelog patching
-      - name: Get Release Notes
-        id: release_notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE_BODY=$(gh release view ${{ steps.get_version.outputs.version }} --json body --jq '.body')
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # Update the Unreleased section with the current release note
-      - name: Patch Changelog
-        if: ${{ steps.release_notes.outputs.body != '' }}
-        env:
-          CHANGELOG: ${{ steps.release_notes.outputs.body }}
-        run: |
-          RELEASE_NOTE="./build/tmp/release_note.txt"
-          mkdir -p "$(dirname "$RELEASE_NOTE")"
-          echo "$CHANGELOG" > $RELEASE_NOTE
-
-          ./gradlew patchChangelog --release-note-file=$RELEASE_NOTE
-
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
         id: publish_marketplace
@@ -108,32 +83,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit "${{ steps.get_version.outputs.version }}" --draft=false
-
-      # Create a pull request
-      - name: Create Pull Request
-        if: ${{ steps.release_notes.outputs.body != '' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          BRANCH="changelog-update-$VERSION"
-          LABEL="release changelog"
-
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          git checkout -b $BRANCH
-          git add CHANGELOG.md
-          git commit -m "Changelog update - $VERSION"
-          git push --set-upstream origin $BRANCH
-
-          gh label create "$LABEL" \
-            --description "Pull requests with release changelog update" \
-            --force \
-            || true
-
-          gh pr create \
-            --title "Changelog update - \`$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-            --label "$LABEL" \
-            --head $BRANCH
