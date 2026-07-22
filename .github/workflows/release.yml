@@ -72,16 +72,16 @@ jobs:
           RELEASE_NOTE="./build/tmp/release_note.txt"
           ./gradlew getChangelog --unreleased --no-header --quiet --console=plain --output-file=$RELEASE_NOTE
 
-          gh release create ${{ steps.compute_version.outputs.version }} \
+          gh release create v${{ steps.compute_version.outputs.version }} \
             --draft \
-            --title ${{ steps.compute_version.outputs.version }} \
+            --title v${{ steps.compute_version.outputs.version }} \
             --notes-file $RELEASE_NOTE
 
       # Upload the plugin artifact to the draft release
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.compute_version.outputs.version }} ./build/distributions/*
+        run: gh release upload v${{ steps.compute_version.outputs.version }} ./build/distributions/*
 
       # Replace the [Unreleased] section of CHANGELOG.md with the release note
       - name: Patch Changelog
@@ -114,7 +114,7 @@ jobs:
             || true
 
           gh pr create \
-            --title "Changelog update - \`$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version. Merging this PR does not trigger a marketplace publish — run the Publish workflow for that." \
+            --title "Changelog update - \`v$VERSION\`" \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`v$VERSION\` version. Merging this PR triggers the \`Create Tag\` workflow, which creates an annotated \`v$VERSION\` tag. Publishing to the JetBrains Marketplace and flipping the draft release to public then happen automatically. Use the \`Publish\` workflow_dispatch trigger only for re-runs and recovery." \
             --label "$LABEL" \
             --head $BRANCH

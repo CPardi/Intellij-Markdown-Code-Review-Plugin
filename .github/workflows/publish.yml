@@ -1,7 +1,14 @@
-# GitHub Actions Workflow created for handling the publish process based on the draft release prepared with the Release workflow.
-# This workflow is triggered manually via workflow_dispatch and handles:
-# - Publishing the plugin to JetBrains Marketplace
-# - Converting the draft release to a published release
+# GitHub Actions Workflow for publishing the plugin.
+#
+# Triggers:
+# - `push` on `v*` tags: created by the `Create Tag` workflow when the
+#   `Changelog update` PR is merged.
+# - `workflow_dispatch`: manual trigger for re-runs and recovery; accepts an
+#   optional `version` input. Leave blank to publish the latest draft.
+#
+# Responsibilities:
+# - Publish the plugin to JetBrains Marketplace.
+# - Convert the matching draft release to a published release.
 #
 # Running the publishPlugin task requires all the following secrets to be provided:
 # PUBLISH_TOKEN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD, CERTIFICATE_CHAIN.
@@ -9,6 +16,8 @@
 
 name: Publish
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       version:
@@ -34,7 +43,10 @@ jobs:
         with:
           cache-read-only: true
 
-      # Determine the version to publish
+      # Determine the version to publish. For tag pushes, take it from
+      # `github.ref_name` (e.g. `v1.2.3` -> `1.2.3`). For workflow_dispatch,
+      # use the explicit input if provided, otherwise resolve to the latest
+      # draft release.
       - name: Get Version
         id: get_version
         env:
@@ -43,6 +55,8 @@ jobs:
         run: |
           if [ -n "$INPUT_VERSION" ]; then
             VERSION="$INPUT_VERSION"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
           else
             # Find the latest draft release
             VERSION=$(gh api repos/{owner}/{repo}/releases \
@@ -52,6 +66,8 @@ jobs:
               echo "Error: No draft release found. Please create a draft release first using the Release workflow."
               exit 1
             fi
+            # Draft tag name has the v<VERSION> scheme; strip the prefix.
+            VERSION="${VERSION#v}"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version to publish: $VERSION"
@@ -60,11 +76,34 @@ jobs:
       - name: Fetch Sources at Tag
         uses: actions/checkout@v6
         with:
-          ref: ${{ steps.get_version.outputs.version }}
+          ref: v${{ steps.get_version.outputs.version }}
+
+      # Verify the matching draft release exists and is still a draft. Refuses
+      # to publish against manually pushed tags with no draft and skips when
+      # the release has already been published (idempotent re-runs).
+      - name: Verify Release State
+        id: verify_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          RELEASE_JSON=$(gh api "repos/{owner}/{repo}/releases/tags/v$VERSION" 2>/dev/null || true)
+          if [ -z "$RELEASE_JSON" ]; then
+            echo "Error: No release found for tag v$VERSION. Tags must be created via the Create Tag workflow."
+            exit 1
+          fi
+          IS_DRAFT=$(echo "$RELEASE_JSON" | jq -r '.draft')
+          if [ "$IS_DRAFT" != "true" ]; then
+            echo "::warning::Release v$VERSION is no longer a draft; skipping publish (already published)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
         id: publish_marketplace
+        if: ${{ steps.verify_release.outputs.should_publish == 'true' }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
@@ -82,4 +121,5 @@ jobs:
         if: ${{ steps.publish_marketplace.outcome == 'success' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ steps.get_version.outputs.version }}" --draft=false
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: gh release edit "v$VERSION" --draft=false
