@@ -89,6 +89,7 @@ jobs:
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin to JetBrains Marketplace
+        id: publish_marketplace
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
@@ -100,6 +101,13 @@ jobs:
           else
             echo "::warning::PUBLISH_TOKEN secret is not set. Plugin was not published to JetBrains Marketplace."
           fi
+
+      # Convert the draft release created by release.yml to a published release.
+      - name: Publish GitHub Release
+        if: ${{ steps.publish_marketplace.outcome == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ steps.get_version.outputs.version }}" --draft=false
 
       # Create a pull request
       - name: Create Pull Request
