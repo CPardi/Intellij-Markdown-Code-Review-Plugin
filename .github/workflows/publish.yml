@@ -68,7 +68,7 @@ jobs:
       # paths the existing Fetch Sources at Tag step handles checkout.
       - name: Fetch Sources at Merge Commit
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
@@ -157,7 +157,7 @@ jobs:
       # PR-merge path because we are already on the merge commit.
       - name: Fetch Sources at Tag
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: v${{ steps.get_version.outputs.version }}
 
