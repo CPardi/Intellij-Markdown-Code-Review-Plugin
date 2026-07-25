@@ -28,7 +28,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Fetch Sources
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Set up build environment with read-only cache
       - name: Setup Build Environment
@@ -60,7 +60,7 @@ jobs:
 
       # Check out at the release tag (overrides the default checkout from composite action)
       - name: Fetch Sources at Tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.get_version.outputs.version }}
 
