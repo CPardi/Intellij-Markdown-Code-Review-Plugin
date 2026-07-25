@@ -115,6 +115,6 @@ jobs:
 
           gh pr create \
             --title "Changelog update - \`v$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`v$VERSION\` version. Merging this PR triggers the \`Create Tag\` workflow, which creates an annotated \`v$VERSION\` tag. Publishing to the JetBrains Marketplace and flipping the draft release to public then happen automatically. Use the \`Publish\` workflow_dispatch trigger only for re-runs and recovery." \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`v$VERSION\` version. Merging this PR triggers the \`Publish\` workflow, which publishes the release to the JetBrains Marketplace, flips the draft release to public, and then — as the final step — creates the annotated \`v$VERSION\` tag at the merge commit. Use the \`Publish\` workflow_dispatch trigger only for re-runs and recovery." \
             --label "$LABEL" \
             --head $BRANCH
