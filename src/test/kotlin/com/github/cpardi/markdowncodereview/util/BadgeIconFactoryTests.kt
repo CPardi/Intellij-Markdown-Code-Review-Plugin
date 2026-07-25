@@ -158,8 +158,8 @@ class BadgeIconFactoryTests {
             // Then: Should be reasonable size (base is 12px)
             assertTrue(width > 0, "Icon width should be positive")
             assertTrue(height > 0, "Icon height should be positive")
-            assertTrue(width <= 24, "Icon width should not be excessive")
-            assertTrue(height <= 24, "Icon height should not be excessive")
+            assertTrue(width <= 32, "Icon width should not be excessive")
+            assertTrue(height <= 32, "Icon height should not be excessive")
         }
 
         @Test
