@@ -90,31 +90,16 @@ jobs:
       # Open a PR targeting main with the patched CHANGELOG.md.
       # Branch off origin/main explicitly so the PR's diff against main only
       # contains CHANGELOG.md (and gradle.properties if the changelog plugin
-      # bumped the version) — never any .github/workflows/*.yml drift.
+      # bumped the version)
       - name: Create Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.compute_version.outputs.version }}"
-          BRANCH="changelog-update-$VERSION"
-          LABEL="release changelog"
-
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          git fetch origin main
-          git checkout -b $BRANCH origin/main
-          git add CHANGELOG.md gradle.properties
-          git commit -m "Changelog update - $VERSION"
-          git push --set-upstream origin $BRANCH
-
-          gh label create "$LABEL" \
-            --description "Pull requests with release changelog update" \
-            --force \
-            || true
-
-          gh pr create \
-            --title "Changelog update - \`v$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`v$VERSION\` version. Merging this PR triggers the \`Publish\` workflow, which publishes the release to the JetBrains Marketplace, flips the draft release to public, and then — as the final step — creates the annotated \`v$VERSION\` tag at the merge commit. Use the \`Publish\` workflow_dispatch trigger only for re-runs and recovery." \
-            --label "$LABEL" \
-            --head $BRANCH
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Changelog update for release ${{ steps.compute_version.outputs.version }}"
+          title: "Changelog update for release `v${{ steps.compute_version.outputs.version }}`"
+          body: |
+            Current pull request contains patched `CHANGELOG.md` file for the `v${{ steps.compute_version.outputs.version }}` version. Merging this PR triggers the `Publish` workflow, which publishes the release to the [JetBrains Marketplace](https://plugins.jetbrains.com).
+          branch: changelog-update-${{ steps.compute_version.outputs.version }}
+          base: main
+          labels: release changelog
+          delete-branch: true
