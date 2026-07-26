@@ -182,16 +182,10 @@ jobs:
         env:
           VERSION: ${{ steps.get_version.outputs.version }}
         run: |
-          TAG="v$VERSION"
-
-          if git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
-            echo "Tag $TAG already exists on origin; skipping."
+          if git ls-remote --tags origin "refs/tags/v$VERSION" | grep -q "refs/tags/v$VERSION$"; then
+            echo "Tag v$VERSION already exists on origin; skipping."
             exit 0
           fi
-
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          git tag -a "$TAG" -F ./build/tmp/release_note.txt
-          git push origin "$TAG"
-          echo "Tag $TAG created and pushed."
+          git tag -a "v$VERSION" -F ./build/tmp/release_note.txt
+          git push origin "v$VERSION"
+          echo "Tag v$VERSION created and pushed."
