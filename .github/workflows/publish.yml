@@ -10,8 +10,8 @@
 # - `push` on `v*` tags: safety net for manually pushed tags. The `Verify
 #   Release State` step refuses to publish against tags without a matching
 #   draft release, preserving the original behaviour.
-# - `workflow_dispatch`: manual trigger for re-runs and recovery. Accepts an
-#   optional `version` input. Leave blank to publish the latest draft.
+# - `workflow_dispatch`: manual trigger for re-runs and recovery. Accepts a
+#   required `version` input.
 #
 # Responsibilities:
 # - Publish the plugin to JetBrains Marketplace.
@@ -35,9 +35,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag to publish (e.g., 1.0.0). Leave empty to use latest draft release.'
-        required: false
-        default: ''
+        description: 'Version tag to publish (e.g., v1.0.0)'
+        required: true
 
 concurrency:
   # Keyed on the workflow and a trigger-specific suffix so that two changelog
@@ -73,77 +72,6 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
 
-      # Determine the version to publish. For PR merges, read it from
-      # `gradle.properties` at the merge commit (the `Changelog update` PR
-      # was merged, so the `## [Unreleased]` heading has been replaced by
-      # `## [<VERSION>]`). For tag pushes, strip `v` from `github.ref_name`.
-      # For `workflow_dispatch`, use the explicit input if provided,
-      # otherwise resolve to the latest draft release.
-      - name: Get Version
-        id: get_version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_VERSION: ${{ github.event.inputs.version }}
-        run: |
-          if [ -n "$INPUT_VERSION" ]; then
-            VERSION="$INPUT_VERSION"
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            VERSION=$(grep -E '^version[[:space:]]*=' gradle.properties \
-              | head -n 1 \
-              | cut -d'=' -f2- \
-              | tr -d '[:space:]')
-            if [ -z "$VERSION" ]; then
-              echo "Error: could not read 'version' from gradle.properties"
-              exit 1
-            fi
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            VERSION="${GITHUB_REF_NAME#v}"
-          else
-            # Find the latest draft release
-            VERSION=$(gh api repos/{owner}/{repo}/releases \
-              --jq '.[] | select(.draft == true) | .tag_name' \
-              | head -n 1)
-            if [ -z "$VERSION" ]; then
-              echo "Error: No draft release found. Please create a draft release first using the Release workflow."
-              exit 1
-            fi
-            # Draft tag name has the v<VERSION> scheme; strip the prefix.
-            VERSION="${VERSION#v}"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version to publish: $VERSION"
-
-      # On the PR-merge path, extract the matching `## [<VERSION>]` section
-      # from CHANGELOG.md so it can be used as the annotated tag message.
-      # The `Changelog update` PR has already been merged, so the section is
-      # no longer under `## [Unreleased]`. On tag-push / workflow_dispatch
-      # paths this is unnecessary because `release.yml` already created the
-      # draft release with the same body.
-      - name: Read Release Notes
-        if: github.event_name == 'pull_request'
-        id: read_release_notes
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          NOTES_FILE="./build/tmp/release_note.txt"
-          mkdir -p "$(dirname "$NOTES_FILE")"
-
-          awk -v ver="[$VERSION]" '
-            BEGIN { capture = 0 }
-            /^## \[/ {
-              if (capture) { exit }
-              prefix = "## " ver
-              head = substr($0, 1, length(prefix))
-              if (head == prefix) { capture = 1; print; next }
-            }
-            capture { print }
-          ' CHANGELOG.md > "$NOTES_FILE"
-
-          if [ ! -s "$NOTES_FILE" ]; then
-            echo "Error: release notes for version $VERSION not found in CHANGELOG.md"
-            exit 1
-          fi
-          echo "Release notes extracted for version $VERSION"
-
       # Set up build environment with read-only cache. The composite action
       # does not perform its own checkout, so the earlier merge-commit
       # checkout on the PR-merge path is preserved.
@@ -151,6 +79,38 @@ jobs:
         uses: ./.github/workflows/actions/setup-build-environment
         with:
           cache-read-only: true
+
+      # Determine the version to publish. For PR merges, query Gradle for the
+      # project version at the merge commit. For tag pushes, strip `v` from
+      # `github.ref_name`. For `workflow_dispatch`, use the explicit input.
+      - name: Get Version
+        id: get_version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request)
+              VERSION=$(./gradlew properties --property version --quiet --console=plain | sed -n 's/^version: //p')
+              ;;
+            push)
+              VERSION="${GITHUB_REF_NAME#v}"
+              ;;
+            workflow_dispatch)
+              VERSION="$INPUT_VERSION"
+              ;;
+          esac
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version to publish: $VERSION"
+
+      # Extract the release notes for the current version from CHANGELOG.md.
+      - name: Read Release Notes
+        if: github.event_name == 'pull_request'
+        id: read_release_notes
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          NOTES_FILE="./build/tmp/release_note.txt"
+          ./gradlew getChangelog --project-version="$VERSION" --no-header --quiet --console=plain --output-file="$NOTES_FILE"
 
       # On tag-push / workflow_dispatch paths, re-check out at the release
       # tag so the build runs against the tagged commit. Skipped on the
