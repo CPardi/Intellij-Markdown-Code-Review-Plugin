@@ -92,7 +92,7 @@ jobs:
       # contains CHANGELOG.md (and gradle.properties if the changelog plugin
       # bumped the version)
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Changelog update for release ${{ steps.compute_version.outputs.version }}"
