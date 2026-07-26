@@ -37,7 +37,6 @@ class ReviewToolWindowPanelTestSuite {
         @Test
         fun `panel is initialised with available reviews`() {
             // Given: Multiple reviews exist
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/review-2.md", "")
             createVirtualFile("reviews/review-3.md", "")
@@ -112,7 +111,6 @@ class ReviewToolWindowPanelTestSuite {
         @Test
         fun `onReviewSelected switches to different review`() {
             // Given: Multiple reviews exist and one is active
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/review-2.md", "")
             service.setActiveReview("review-1")
@@ -251,8 +249,6 @@ class ReviewToolWindowPanelTestSuite {
         @Test
         fun `panel handles empty reviews directory gracefully`() {
             // Given: No reviews exist
-            createDirectory("reviews")
-
             // When: Panel is created
             val panel = ReviewToolWindowPanel(project, service)
 
