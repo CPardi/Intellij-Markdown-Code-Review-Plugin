@@ -1,8 +1,26 @@
-# GitHub Actions Workflow created for handling the publish process based on the draft release prepared with the Release workflow.
-# This workflow is triggered manually via workflow_dispatch and handles:
-# - Publishing the plugin to JetBrains Marketplace
-# - Converting the draft release to a published release
-# - Creating a PR for changelog updates
+# GitHub Actions workflow for publishing the plugin and creating the release tag.
+#
+# Triggers:
+# - `pull_request: closed`, gated on merge + branch-name pattern: fires when
+#   the `Changelog update` PR is merged. This is the canonical release path:
+#   the workflow publishes the plugin, flips the draft release to public,
+#   and then — as the final step — creates and pushes the annotated
+#   `v<VERSION>` tag at the merge commit. Tagging happens last so a publish
+#   or draft-flip failure does not leave an orphan tag on the repository.
+# - `push` on `v*` tags: safety net for manually pushed tags. The `Verify
+#   Release State` step refuses to publish against tags without a matching
+#   draft release, preserving the original behaviour.
+# - `workflow_dispatch`: manual trigger for re-runs and recovery. Accepts a
+#   required `version` input.
+#
+# Responsibilities:
+# - Publish the plugin to JetBrains Marketplace.
+# - Convert the matching draft release to a published release.
+# - Create and push the annotated release tag (PR-merge path only).
+#
+# The draft release is produced by `release.yml` (which opens the
+# `Changelog update` PR). Merging that PR is what fires the canonical
+# release path here; the tag is no longer created by a separate workflow.
 #
 # Running the publishPlugin task requires all the following secrets to be provided:
 # PUBLISH_TOKEN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD, CERTIFICATE_CHAIN.
@@ -10,129 +28,164 @@
 
 name: Publish
 on:
+  pull_request:
+    types: [closed]
+  push:
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag to publish (e.g., 1.0.0). Leave empty to use latest draft release.'
-        required: false
-        default: ''
+        description: 'Version tag to publish (e.g., v1.0.0)'
+        required: true
+
+concurrency:
+  # Keyed on the workflow and a trigger-specific suffix so that two changelog
+  # PRs merging back-to-back cannot race on the same tag, and a re-run of any
+  # trigger does not clobber an in-flight publish.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
 
-  # Publish the plugin to JetBrains Marketplace and convert draft to published release
+  # Publish the plugin to JetBrains Marketplace, convert the draft release to
+  # a public release, and (on the PR-merge path) create the annotated tag.
   publish:
     name: Publish Plugin
-    runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'changelog-update-'))
+    runs-on: ubuntu-latest
     steps:
-      - name: Fetch Sources
+      # On the PR-merge path the tag has not been pushed yet, so check out at
+      # the merge commit with full history so the subsequent `git tag` /
+      # `git push origin` steps can run. On tag-push / workflow_dispatch
+      # paths the existing Fetch Sources at Tag step handles checkout.
+      - name: Fetch Sources at Merge Commit
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
 
-      # Set up build environment with read-only cache
+      # Set up build environment with read-only cache. The composite action
+      # does not perform its own checkout, so the earlier merge-commit
+      # checkout on the PR-merge path is preserved.
       - name: Setup Build Environment
         uses: ./.github/workflows/actions/setup-build-environment
         with:
           cache-read-only: true
 
-      # Determine the version to publish
+      # Determine the version to publish. For PR merges, query Gradle for the
+      # project version at the merge commit. For tag pushes, strip `v` from
+      # `github.ref_name`. For `workflow_dispatch`, use the explicit input.
       - name: Get Version
         id: get_version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ -n "$INPUT_VERSION" ]; then
-            VERSION="$INPUT_VERSION"
-          else
-            # Find the latest draft release
-            VERSION=$(gh api repos/{owner}/{repo}/releases \
-              --jq '.[] | select(.draft == true) | .tag_name' \
-              | head -n 1)
-            if [ -z "$VERSION" ]; then
-              echo "Error: No draft release found. Please create a draft release first using the Release workflow."
-              exit 1
-            fi
-          fi
+          case "${{ github.event_name }}" in
+            pull_request)
+              VERSION=$(./gradlew properties --property version --quiet --console=plain | sed -n 's/^version: //p')
+              ;;
+            push)
+              VERSION="${GITHUB_REF_NAME#v}"
+              ;;
+            workflow_dispatch)
+              VERSION="$INPUT_VERSION"
+              ;;
+          esac
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version to publish: $VERSION"
 
-      # Check out at the release tag (overrides the default checkout from composite action)
+      # Extract the release notes for the current version from CHANGELOG.md.
+      - name: Read Release Notes
+        if: github.event_name == 'pull_request'
+        id: read_release_notes
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          NOTES_FILE="./build/tmp/release_note.txt"
+          ./gradlew getChangelog --project-version="$VERSION" --no-header --quiet --console=plain --output-file="$NOTES_FILE"
+
+      # On tag-push / workflow_dispatch paths, re-check out at the release
+      # tag so the build runs against the tagged commit. Skipped on the
+      # PR-merge path because we are already on the merge commit.
       - name: Fetch Sources at Tag
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v7
         with:
-          ref: ${{ steps.get_version.outputs.version }}
+          ref: v${{ steps.get_version.outputs.version }}
 
-      # Get release notes for changelog patching
-      - name: Get Release Notes
-        id: release_notes
+      # Verify the matching draft release exists and is still a draft. Refuses
+      # to publish against manually pushed tags with no draft and skips when
+      # the release has already been published (idempotent re-runs). Skipped
+      # on the PR-merge path because `release.yml` already produced the draft
+      # upstream and the publish step will fail with a clear error if it is
+      # missing.
+      - name: Verify Release State
+        if: github.event_name != 'pull_request'
+        id: verify_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version }}
         run: |
-          RELEASE_BODY=$(gh release view ${{ steps.get_version.outputs.version }} --json body --jq '.body')
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          RELEASE_JSON=$(gh api "repos/{owner}/{repo}/releases/tags/v$VERSION" 2>/dev/null || true)
+          if [ -z "$RELEASE_JSON" ]; then
+            echo "Error: No release found for tag v$VERSION. Tags must be created by merging the Changelog update PR or by the Publish workflow on the PR-merge path."
+            exit 1
+          fi
+          IS_DRAFT=$(echo "$RELEASE_JSON" | jq -r '.draft')
+          if [ "$IS_DRAFT" != "true" ]; then
+            echo "::warning::Release v$VERSION is no longer a draft; skipping publish (already published)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      # Update the Unreleased section with the current release note
-      - name: Patch Changelog
-        if: ${{ steps.release_notes.outputs.body != '' }}
-        env:
-          CHANGELOG: ${{ steps.release_notes.outputs.body }}
-        run: |
-          RELEASE_NOTE="./build/tmp/release_note.txt"
-          mkdir -p "$(dirname "$RELEASE_NOTE")"
-          echo "$CHANGELOG" > $RELEASE_NOTE
-
-          ./gradlew patchChangelog --release-note-file=$RELEASE_NOTE
-
-      # Publish the plugin to JetBrains Marketplace
-      - name: Publish Plugin
+      # Publish the plugin to JetBrains Marketplace. On the PR-merge path the
+      # release was produced by `release.yml` and is guaranteed to be a draft,
+      # so publish unconditionally.
+      - name: Publish Plugin to JetBrains Marketplace
+        id: publish_marketplace
+        if: ${{ github.event_name == 'pull_request' || steps.verify_release.outputs.should_publish == 'true' }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
-        run: ./gradlew publishPlugin
-
-      # Convert draft release to published release
-      - name: Publish Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release edit ${{ steps.get_version.outputs.version }} --draft=false
+          if [ -n "$PUBLISH_TOKEN" ]; then
+            ./gradlew publishPlugin
+          else
+            echo "::warning::PUBLISH_TOKEN secret is not set. Plugin was not published to JetBrains Marketplace."
+          fi
 
-      # Upload an artifact as a release asset
-      - name: Upload Release Asset
+      # Convert the draft release created by release.yml to a published release.
+      - name: Publish GitHub Release
+        if: ${{ steps.publish_marketplace.outcome == 'success' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ steps.get_version.outputs.version }} ./build/distributions/*
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: gh release edit "v$VERSION" --draft=false
 
-      # Create a pull request
-      - name: Create Pull Request
-        if: ${{ steps.release_notes.outputs.body != '' }}
+      # Create the annotated `v<VERSION>` tag at the merge commit. This is
+      # the final step on the PR-merge path so that a failure in the publish
+      # or draft-flip steps above exits the job before any tag is pushed.
+      # Skips cleanly on re-runs if the tag already exists remotely.
+      - name: Create Annotated Tag
+        if: github.event_name == 'pull_request'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version }}
         run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          BRANCH="changelog-update-$VERSION"
-          LABEL="release changelog"
-
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          git checkout -b $BRANCH
-          git commit -am "Changelog update - $VERSION"
-          git push --set-upstream origin $BRANCH
-
-          gh label create "$LABEL" \
-            --description "Pull requests with release changelog update" \
-            --force \
-            || true
-
-          gh pr create \
-            --title "Changelog update - \`$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-            --label "$LABEL" \
-            --head $BRANCH
+          if git ls-remote --tags origin "refs/tags/v$VERSION" | grep -q "refs/tags/v$VERSION$"; then
+            echo "Tag v$VERSION already exists on origin; skipping."
+            exit 0
+          fi
+          git tag -a "v$VERSION" -F ./build/tmp/release_note.txt
+          git push origin "v$VERSION"
+          echo "Tag v$VERSION created and pushed."

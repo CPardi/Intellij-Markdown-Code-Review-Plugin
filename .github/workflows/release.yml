@@ -1,6 +1,7 @@
 # GitHub Actions workflow for creating draft releases after successful builds.
 # This workflow is triggered automatically when the Build workflow completes successfully on the main branch.
-# It downloads the plugin artifact, creates a draft GitHub release, and uploads the artifact.
+# It downloads the plugin artifact, creates a draft GitHub release, uploads the artifact,
+# patches CHANGELOG.md against the release note, and opens a PR targeting main.
 #
 # The workflow is triggered on workflow_run events from the Build workflow.
 #
@@ -14,7 +15,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.id }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id }}-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -26,6 +27,7 @@ jobs:
     permissions:
       contents: write
       actions: read
+      pull-requests: write
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v7
@@ -54,24 +56,65 @@ jobs:
             --jq '.[] | select(.draft == true) | .id' \
             | xargs -r -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
 
+      # Compute VERSION once and publish to $GITHUB_OUTPUT for downstream steps
+      - name: Compute Version
+        id: compute_version
+        run: |
+          VERSION=$(./gradlew properties --property version --quiet --console=plain | tail -n 1 | cut -f2- -d ' ')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
       # Create a new release draft which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(./gradlew properties --property version --quiet --console=plain | tail -n 1 | cut -f2- -d ' ')
           RELEASE_NOTE="./build/tmp/release_note.txt"
           ./gradlew getChangelog --unreleased --no-header --quiet --console=plain --output-file=$RELEASE_NOTE
 
-          gh release create $VERSION \
+          gh release create v${{ steps.compute_version.outputs.version }} \
             --draft \
-            --title $VERSION \
+            --title v${{ steps.compute_version.outputs.version }} \
             --notes-file $RELEASE_NOTE
 
       # Upload the plugin artifact to the draft release
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload v${{ steps.compute_version.outputs.version }} ./build/distributions/*
+
+      # Replace the [Unreleased] section of CHANGELOG.md with the release note
+      - name: Patch Changelog
+        run: ./gradlew patchChangelog --release-note-file=./build/tmp/release_note.txt
+
+      # Open a PR targeting main with the patched CHANGELOG.md.
+      # Branch off origin/main explicitly so the PR's diff against main only
+      # contains CHANGELOG.md (and gradle.properties if the changelog plugin
+      # bumped the version) — never any .github/workflows/*.yml drift.
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(./gradlew properties --property version --quiet --console=plain | tail -n 1 | cut -f2- -d ' ')
-          gh release upload $VERSION ./build/distributions/*
+          VERSION="${{ steps.compute_version.outputs.version }}"
+          BRANCH="changelog-update-$VERSION"
+          LABEL="release changelog"
+
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+          git fetch origin main
+          git checkout -b $BRANCH origin/main
+          git add CHANGELOG.md gradle.properties
+          git commit -m "Changelog update - $VERSION"
+          git push --set-upstream origin $BRANCH
+
+          gh label create "$LABEL" \
+            --description "Pull requests with release changelog update" \
+            --force \
+            || true
+
+          gh pr create \
+            --title "Changelog update - \`v$VERSION\`" \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`v$VERSION\` version. Merging this PR triggers the \`Publish\` workflow, which publishes the release to the JetBrains Marketplace, flips the draft release to public, and then — as the final step — creates the annotated \`v$VERSION\` tag at the merge commit. Use the \`Publish\` workflow_dispatch trigger only for re-runs and recovery." \
+            --label "$LABEL" \
+            --head $BRANCH
