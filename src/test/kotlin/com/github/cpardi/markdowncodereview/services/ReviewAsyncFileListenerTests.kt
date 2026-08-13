@@ -394,8 +394,6 @@ class ReviewAsyncFileListenerTestSuite {
         fun `test actual file move through VFS updates comment path`() {
             // Given: Files in a directory with comments
             service.createNewReview()
-            createDirectory("src")
-            createDirectory("dest")
             createVirtualFile("src/File.xml", "<content/>")
             service.addComment("src/File.xml", 1, 1, "Comment")
 
@@ -411,7 +409,6 @@ class ReviewAsyncFileListenerTestSuite {
         fun `test renaming directory updates all contained file comments`() {
             // Given: Multiple files in a directory with comments
             service.createNewReview()
-            createDirectory("olddir")
             createVirtualFile("olddir/File1.xml", "<one/>")
             createVirtualFile("olddir/File2.xml", "<two/>")
             service.addComment("olddir/File1.xml", 1, 1, "Comment 1")

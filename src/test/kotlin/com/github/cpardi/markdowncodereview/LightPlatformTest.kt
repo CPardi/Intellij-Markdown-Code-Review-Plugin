@@ -70,24 +70,6 @@ abstract class LightPlatformTest : BasePlatformTestCase() {
     }
 
     /**
-     * Creates a directory structure in the test project.
-     *
-     * @param relativePath The directory path relative to the project root
-     * @return The created VirtualFile representing the directory
-     * @throws IOException if directory creation fails
-     */
-    @Throws(IOException::class)
-    protected fun createDirectory(relativePath: String): VirtualFile {
-        val basePath = project.basePath ?: throw IllegalStateException("Project has no base directory")
-        val projectDir = VirtualFileManager.getInstance().findFileByNioPath(java.nio.file.Path.of(basePath))
-            ?: throw IllegalStateException("Project directory not found: $basePath")
-
-        return runWriteAction<VirtualFile> {
-            VfsUtil.createDirectories(projectDir.path + "/" + relativePath)
-        }
-    }
-
-    /**
      * Creates a temporary file in the test project's temporary directory.
      * The file will be automatically cleaned up after the test.
      *

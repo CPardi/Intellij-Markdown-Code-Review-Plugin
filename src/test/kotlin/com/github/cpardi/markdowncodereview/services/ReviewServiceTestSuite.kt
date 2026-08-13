@@ -43,8 +43,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test returns empty list when reviews directory is empty`() {
             // Given: An empty reviews directory
-            createDirectory("reviews")
-
             // When: Getting available review names
             val names = service.getAvailableReviewNames()
 
@@ -55,7 +53,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test returns sorted list of review names`() {
             // Given: Multiple review files
-            createDirectory("reviews")
             createVirtualFile("reviews/review-2.md", "")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/review-3.md", "")
@@ -70,7 +67,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test filters to only md files`() {
             // Given: Directory with mixed file types
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/notes.txt", "")
             createVirtualFile("reviews/image.png", "")
@@ -85,7 +81,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test strips md extension from names`() {
             // Given: A review file
-            createDirectory("reviews")
             createVirtualFile("reviews/my-review.md", "")
 
             // When: Getting available review names
@@ -163,7 +158,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test handles gap in sequence`() {
             // Given: review-1 and review-3 exist
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/review-3.md", "")
 
@@ -182,7 +176,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test deletes existing review file from disk`() {
             // Given: A review file
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
 
             // When: Deleting the review
@@ -230,7 +223,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test active review remains when deleting different review`() {
             // Given: Two reviews, one active
-            createDirectory("reviews")
             createVirtualFile("reviews/review-1.md", "")
             createVirtualFile("reviews/review-2.md", "")
 
@@ -247,9 +239,7 @@ object ReviewServiceTestSuite {
 
         @Test
         fun `test returns false when file does not exist`() {
-            // Given: A reviews directory but no such file
-            createDirectory("reviews")
-
+            // Given: no existing files
             // When: Trying to delete a non-existent review
             val result = service.deleteReview("nonexistent")
 
@@ -291,7 +281,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test loads review from disk and sets active review`() {
             // Given: A review file on disk
-            createDirectory("reviews")
             val content = "@[src/Main.kt:1:5]:\nComment body\n---\n"
             createVirtualFile("reviews/test-review.md", content)
 
@@ -307,8 +296,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test handles file not found gracefully`() {
             // Given: No review file with that name
-            createDirectory("reviews")
-
             // When: Setting active review to non-existent file
             service.setActiveReview("nonexistent")
 
@@ -646,7 +633,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test getRelativePath returns relative path for nested file`() {
             // Given: A file in a nested directory
-            createDirectory("src")
             val file = createVirtualFile("src/Main.kt", "fun main() {}")
 
             // When: Getting relative path
@@ -671,7 +657,6 @@ object ReviewServiceTestSuite {
         @Test
         fun `test getRelativePath handles deeply nested paths`() {
             // Given: A deeply nested file
-            createDirectory("src/main/kotlin/com/example")
             val file = createVirtualFile("src/main/kotlin/com/example/App.kt", "class App")
 
             // When: Getting relative path
