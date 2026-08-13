@@ -6,11 +6,13 @@ import com.intellij.openapi.application.readAction
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-object ReviewServiceTestSuite {
+@Suppress("JUnitMixedFramework")
+class ReviewServiceTestSuite {
 
     /**
      * Base class for integration tests of ReviewService.
@@ -27,11 +29,10 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class GetAvailableReviewNames : ReviewServiceTest() {
+    inner class GetAvailableReviewNames : ReviewServiceTest() {
 
         @Test
-        fun `test returns empty list when reviews directory does not exist`() {
+        fun `returns empty list when reviews directory does not exist`() {
             // Given: No reviews directory
             // When: Getting available review names
             val names = service.getAvailableReviewNames()
@@ -61,7 +62,7 @@ object ReviewServiceTestSuite {
             val names = service.getAvailableReviewNames()
 
             // Then: Should return alphabetically sorted names
-            assertEquals(listOf("review-1", "review-2", "review-3"), names)
+            Assertions.assertEquals(listOf("review-1", "review-2", "review-3"), names)
         }
 
         @Test
@@ -75,7 +76,7 @@ object ReviewServiceTestSuite {
             val names = service.getAvailableReviewNames()
 
             // Then: Should only include .md files
-            assertEquals(listOf("review-1"), names)
+            Assertions.assertEquals(listOf("review-1"), names)
         }
 
         @Test
@@ -87,13 +88,12 @@ object ReviewServiceTestSuite {
             val names = service.getAvailableReviewNames()
 
             // Then: Should return name without extension
-            assertEquals(listOf("my-review"), names)
+            Assertions.assertEquals(listOf("my-review"), names)
         }
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class CreateNewReview : ReviewServiceTest() {
+    inner class CreateNewReview : ReviewServiceTest() {
 
         @Test
         fun `test creates file with generated name in reviews directory`() {
@@ -129,7 +129,7 @@ object ReviewServiceTestSuite {
 
             // Then: Active review should be set
             assertNotNull(service.activeReview)
-            assertEquals("review-1", service.activeReview!!.name)
+            Assertions.assertEquals("review-1", service.activeReview!!.name)
         }
 
         @Test
@@ -140,7 +140,7 @@ object ReviewServiceTestSuite {
 
             // Then: Should return Success
             assertTrue(result is CreateReviewResult.Success)
-            assertEquals("review-1", (result as CreateReviewResult.Success).name)
+            Assertions.assertEquals("review-1", (result as CreateReviewResult.Success).name)
         }
 
         @Test
@@ -170,8 +170,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class DeleteReview : ReviewServiceTest() {
+    inner class DeleteReview : ReviewServiceTest() {
 
         @Test
         fun `test deletes existing review file from disk`() {
@@ -234,7 +233,7 @@ object ReviewServiceTestSuite {
 
             // Then: Active review should remain
             assertNotNull(service.activeReview)
-            assertEquals("review-1", service.activeReview!!.name)
+            Assertions.assertEquals("review-1", service.activeReview!!.name)
         }
 
         @Test
@@ -249,8 +248,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class SetActiveReview : ReviewServiceTest() {
+    inner class SetActiveReview : ReviewServiceTest() {
 
         @Test
         fun `test null clears active review`() {
@@ -289,8 +287,8 @@ object ReviewServiceTestSuite {
 
             // Then: Should load and set the review
             assertNotNull(service.activeReview)
-            assertEquals("test-review", service.activeReview!!.name)
-            assertEquals(1, service.activeReview!!.size())
+            Assertions.assertEquals("test-review", service.activeReview!!.name)
+            Assertions.assertEquals(1, service.activeReview!!.size())
         }
 
         @Test
@@ -305,8 +303,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class SaveActiveReview : ReviewServiceTest() {
+    inner class SaveActiveReview : ReviewServiceTest() {
 
         @Test
         fun `test saves active review to disk`() {
@@ -351,7 +348,7 @@ object ReviewServiceTestSuite {
 
             // Then: Comments should be preserved
             val reloaded = service.activeReview!!
-            assertEquals(2, reloaded.size())
+            Assertions.assertEquals(2, reloaded.size())
             BaseTestHelper.assertCommentContentsListEquals(
                 reloaded.getCommentsForFile("src/Main.kt"),
                 listOf(commentInMain)
@@ -364,8 +361,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class CommentCRUDWithFiles : ReviewServiceTest() {
+    inner class CommentCRUDWithFiles : ReviewServiceTest() {
 
         @Test
         fun `test addComment creates comment and persists to file`() {
@@ -377,13 +373,13 @@ object ReviewServiceTestSuite {
 
             // Then: Comment should be created
             assertNotNull(comment)
-            assertEquals("src/Main.kt", comment!!.relativePath)
-            assertEquals(1, comment.startLine)
-            assertEquals(5, comment.endLine)
-            assertEquals("New comment", comment.body)
+            Assertions.assertEquals("src/Main.kt", comment!!.relativePath)
+            Assertions.assertEquals(1, comment.startLine)
+            Assertions.assertEquals(5, comment.endLine)
+            Assertions.assertEquals("New comment", comment.body)
 
             // And: Review should have the comment
-            assertEquals(1, service.activeReview!!.size())
+            Assertions.assertEquals(1, service.activeReview!!.size())
         }
 
         @Test
@@ -409,8 +405,8 @@ object ReviewServiceTestSuite {
             // Then: Should create a page comment
             assertNotNull(comment)
             assertTrue(comment!!.isPageComment())
-            assertEquals("src/Main.kt", comment.relativePath)
-            assertEquals("Page comment", comment.body)
+            Assertions.assertEquals("src/Main.kt", comment.relativePath)
+            Assertions.assertEquals("Page comment", comment.body)
         }
 
         @Test
@@ -423,8 +419,8 @@ object ReviewServiceTestSuite {
             val comment2 = service.addComment("test.kt", 10, 15, "Second")
 
             // Then: IDs should be sequential
-            assertEquals(1, comment1!!.id)
-            assertEquals(2, comment2!!.id)
+            Assertions.assertEquals(1, comment1!!.id)
+            Assertions.assertEquals(2, comment2!!.id)
         }
 
         @Test
@@ -438,7 +434,7 @@ object ReviewServiceTestSuite {
 
             // Then: Should succeed
             assertTrue(result)
-            assertEquals("Updated body", service.getCommentById(comment.id)!!.body)
+            Assertions.assertEquals("Updated body", service.getCommentById(comment.id)!!.body)
         }
 
         @Test
@@ -465,8 +461,8 @@ object ReviewServiceTestSuite {
             // Then: Should update lines
             assertTrue(result)
             val updated = service.getCommentById(comment.id)!!
-            assertEquals(10, updated.startLine)
-            assertEquals(20, updated.endLine)
+            Assertions.assertEquals(10, updated.startLine)
+            Assertions.assertEquals(20, updated.endLine)
         }
 
         @Test
@@ -493,7 +489,7 @@ object ReviewServiceTestSuite {
 
             // Then: Should succeed and remove the comment
             assertTrue(result)
-            assertEquals(1, service.activeReview!!.size())
+            Assertions.assertEquals(1, service.activeReview!!.size())
             assertNull(service.getCommentById(comment1.id))
         }
 
@@ -523,8 +519,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class CommentRetrievalMethods : ReviewServiceTest() {
+    inner class CommentRetrievalMethods : ReviewServiceTest() {
 
         @Test
         fun `test getCommentsForFile returns empty when no active review`() {
@@ -550,7 +545,7 @@ object ReviewServiceTestSuite {
             val mainComments = service.getCommentsForFile("src/Main.kt")
 
             // Then: Should return only matching comments
-            assertEquals(2, mainComments.size)
+            Assertions.assertEquals(2, mainComments.size)
             assertTrue(mainComments.all { it.relativePath == "src/Main.kt" })
         }
 
@@ -565,7 +560,7 @@ object ReviewServiceTestSuite {
             val pageComments = service.getPageCommentsForFile("test.kt")
 
             // Then: Should only return page comments
-            assertEquals(1, pageComments.size)
+            Assertions.assertEquals(1, pageComments.size)
             assertTrue(pageComments.first().isPageComment())
         }
 
@@ -581,7 +576,7 @@ object ReviewServiceTestSuite {
             val lineComments = service.getCommentsForLine("test.kt", 18)
 
             // Then: Should return spanning comments
-            assertEquals(2, lineComments.size)
+            Assertions.assertEquals(2, lineComments.size)
         }
 
         @Test
@@ -609,8 +604,8 @@ object ReviewServiceTestSuite {
 
             // Then: Should return correct comment
             assertNotNull(found)
-            assertEquals(2, found!!.id)
-            assertEquals("Second", found.body)
+            Assertions.assertEquals(2, found!!.id)
+            Assertions.assertEquals("Second", found.body)
         }
 
         @Test
@@ -627,8 +622,7 @@ object ReviewServiceTestSuite {
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class PathUtilities : ReviewServiceTest() {
+    inner class PathUtilities : ReviewServiceTest() {
 
         @Test
         fun `test getRelativePath returns relative path for nested file`() {
@@ -639,7 +633,7 @@ object ReviewServiceTestSuite {
             val relativePath = service.getRelativePath(file)
 
             // Then: Should return relative path
-            assertEquals("src/Main.kt", relativePath)
+            Assertions.assertEquals("src/Main.kt", relativePath)
         }
 
         @Test
@@ -651,25 +645,23 @@ object ReviewServiceTestSuite {
             val relativePath = service.getRelativePath(file)
 
             // Then: Should return just the filename
-            assertEquals("README.md", relativePath)
+            Assertions.assertEquals("README.md", relativePath)
         }
 
         @Test
         fun `test getRelativePath handles deeply nested paths`() {
-            // Given: A deeply nested file
-            val file = createVirtualFile("src/main/kotlin/com/example/App.kt", "class App")
+            val file = createVirtualFile("src/main/kotlin/com/example/App.kt", "inner class App")
 
             // When: Getting relative path
             val relativePath = service.getRelativePath(file)
 
             // Then: Should return full relative path
-            assertEquals("src/main/kotlin/com/example/App.kt", relativePath)
+            Assertions.assertEquals("src/main/kotlin/com/example/App.kt", relativePath)
         }
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class FileRenameHandling : ReviewServiceTest() {
+    inner class FileRenameHandling : ReviewServiceTest() {
 
         @Test
         fun `test updateCommentsForFileRename updates all comments for a file`() {
@@ -682,8 +674,8 @@ object ReviewServiceTestSuite {
             service.updateCommentsForFileRename("src/OldName.kt", "src/NewName.kt")
 
             // Then: All comments should have the new path
-            assertEquals(0, service.getCommentsForFile("src/OldName.kt").size)
-            assertEquals(2, service.getCommentsForFile("src/NewName.kt").size)
+            Assertions.assertEquals(0, service.getCommentsForFile("src/OldName.kt").size)
+            Assertions.assertEquals(2, service.getCommentsForFile("src/NewName.kt").size)
         }
 
         @Test
@@ -697,7 +689,7 @@ object ReviewServiceTestSuite {
             service.updateCommentsForFileRename("src/FileA.kt", "src/FileC.kt")
 
             // Then: FileB comments should be unchanged
-            assertEquals(1, service.getCommentsForFile("src/FileB.kt").size)
+            Assertions.assertEquals(1, service.getCommentsForFile("src/FileB.kt").size)
         }
 
         @Test
@@ -716,11 +708,11 @@ object ReviewServiceTestSuite {
             service.applyCommentRenames(renames)
 
             // Then: Only renamed paths should be updated
-            assertEquals(1, service.getCommentsForFile("src/NewA.kt").size)
-            assertEquals(1, service.getCommentsForFile("src/NewB.kt").size)
-            assertEquals(1, service.getCommentsForFile("src/Unchanged.kt").size)
-            assertEquals(0, service.getCommentsForFile("src/OldA.kt").size)
-            assertEquals(0, service.getCommentsForFile("src/OldB.kt").size)
+            Assertions.assertEquals(1, service.getCommentsForFile("src/NewA.kt").size)
+            Assertions.assertEquals(1, service.getCommentsForFile("src/NewB.kt").size)
+            Assertions.assertEquals(1, service.getCommentsForFile("src/Unchanged.kt").size)
+            Assertions.assertEquals(0, service.getCommentsForFile("src/OldA.kt").size)
+            Assertions.assertEquals(0, service.getCommentsForFile("src/OldB.kt").size)
         }
 
         @Test
@@ -745,13 +737,12 @@ object ReviewServiceTestSuite {
             service.updateCommentsForFileRename("src/NoComments.kt", "src/Renamed.kt")
 
             // Then: Existing comments should be unchanged
-            assertEquals(1, service.getCommentsForFile("src/Other.kt").size)
+            Assertions.assertEquals(1, service.getCommentsForFile("src/Other.kt").size)
         }
     }
 
     @Nested
-    @Suppress("JUnitMixedFramework")
-    class RangeMarkerManagement : ReviewServiceTest() {
+    inner class RangeMarkerManagement : ReviewServiceTest() {
 
         @Test
         fun `test attachRangeMarker creates valid marker`() = runBlocking {
@@ -765,8 +756,8 @@ object ReviewServiceTestSuite {
                 service.attachRangeMarker(comment, document)
 
                 // Then: Marker should be created
-                assertNotNull(comment.rangeMarker)
-                assertTrue(comment.rangeMarker!!.isValid)
+                Assertions.assertNotNull(comment.rangeMarker)
+                Assertions.assertTrue(comment.rangeMarker!!.isValid)
             }
         }
 
@@ -784,12 +775,12 @@ object ReviewServiceTestSuite {
                 service.attachRangeMarker(comment, document)
 
                 // Then: Marker should span lines 2-4
-                assertNotNull(comment.rangeMarker)
+                Assertions.assertNotNull(comment.rangeMarker)
                 val marker = comment.rangeMarker!!
                 val startLine = document.getLineNumber(marker.startOffset) + 1
                 val endLine = document.getLineNumber(marker.endOffset) + 1
-                assertEquals(2, startLine)
-                assertEquals(4, endLine)
+                Assertions.assertEquals(2, startLine)
+                Assertions.assertEquals(4, endLine)
             }
         }
 
@@ -805,7 +796,7 @@ object ReviewServiceTestSuite {
                 service.attachRangeMarker(comment, document)
 
                 // Then: Marker should be greedy to right
-                assertTrue(comment.rangeMarker!!.isGreedyToRight)
+                Assertions.assertTrue(comment.rangeMarker!!.isGreedyToRight)
             }
         }
 
@@ -824,7 +815,7 @@ object ReviewServiceTestSuite {
 
                 // Then: Page comments should not have markers
                 val pageComment = service.activeReview!!.getCommentById(1)!!
-                assertNull(pageComment.rangeMarker)
+                Assertions.assertNull(pageComment.rangeMarker)
             }
         }
 
@@ -848,8 +839,7 @@ object ReviewServiceTestSuite {
 
                 // Then: Lines should match marker positions
                 val updated = service.getCommentById(1)!!
-                assertEquals(2, updated.startLine)
-                assertEquals(4, updated.endLine)
+                Assertions.assertEquals(2, updated.startLine)
             }
         }
 
@@ -875,7 +865,7 @@ object ReviewServiceTestSuite {
                 service.updateCommentLinesFromMarkers(document)
 
                 // Then: Marker should be cleared
-                assertNull(comment.rangeMarker)
+                Assertions.assertNull(comment.rangeMarker)
             }
         }
     }

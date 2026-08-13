@@ -173,41 +173,6 @@ class CreateReviewResultTests : UnitTest() {
         }
 
         @Test
-        fun `test sealed class inheritance`() {
-            // Given: Both variants
-            val success: CreateReviewResult = CreateReviewResult.Success("review")
-            val failure: CreateReviewResult = CreateReviewResult.Failure("Error")
-
-            // Then: Both should be instances of sealed class
-            assertTrue(success is CreateReviewResult, "Success should be CreateReviewResult")
-            assertTrue(failure is CreateReviewResult, "Failure should be CreateReviewResult")
-        }
-
-        @Test
-        fun `test is check for Success`() {
-            // Given: A success result
-            val result: CreateReviewResult = CreateReviewResult.Success("review")
-
-            // When: Checking type
-            val isSuccess = result is CreateReviewResult.Success
-
-            // Then: Should be true
-            assertTrue(isSuccess, "Success should be instance of Success variant")
-        }
-
-        @Test
-        fun `test is check for Failure`() {
-            // Given: A failure result
-            val result: CreateReviewResult = CreateReviewResult.Failure("Error")
-
-            // When: Checking type
-            val isFailure = result is CreateReviewResult.Failure
-
-            // Then: Should be true
-            assertTrue(isFailure, "Failure should be instance of Failure variant")
-        }
-
-        @Test
         fun `test smart cast after is check`() {
             // Given: A result of unknown type
             val result: CreateReviewResult = CreateReviewResult.Success("review")

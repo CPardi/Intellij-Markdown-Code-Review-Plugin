@@ -9,6 +9,16 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      junit-dependencies:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.junit.platform:*"
+          - "org.junit.vintage:*"
+          - "junit:junit"
+          - "org.opentest4j:*"
       gradle-dependencies:
         patterns:
           - "*"
