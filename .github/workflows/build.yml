@@ -69,12 +69,8 @@ jobs:
           cache-read-only: true
 
       # Run tests
-      - name: Run Tests
-        run: ./gradlew check
-
-      # Generate coverage reports
-      - name: Generate Coverage Report
-        run: ./gradlew koverHtmlReport koverXmlReport
+      - name: Run Tests and Generate Coverage Report
+        run: ./gradlew check koverHtmlReport koverXmlReport
 
       # Add coverage report
       - name: Display Coverage Report
