@@ -20,7 +20,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.14.4")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.14.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.14.4")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.14.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 
     // JUnit 4 - Required workaround for IJPL-159134 (JUnit5 Test Framework refers to JUnit4)
     testImplementation("junit:junit:4.13.2")
