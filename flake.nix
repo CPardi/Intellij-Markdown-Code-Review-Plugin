@@ -47,6 +47,10 @@
             pkgs.jdt-language-server
           ];
 
+        packages = with pkgs; [
+          actionlint
+        ];
+
           shellHook = ''
             echo "Run 'nix run .#fhs' to enter an FHS-compatible shell for 'gradlew runIde'"
           '';

@@ -5,6 +5,8 @@
 
 ## Tech Layers
 
+- **Continuous Integration** GitHub Actions
+  - Documentation: https://docs.github.com/en/actions
 - **Build System**: Gradle
   - User Guide: https://docs.gradle.org/current/userguide/userguide.html
 - **Framework**: IntelliJ Platform SDK
@@ -23,7 +25,7 @@
 ### General Rules
 
 - Respect the .editorconfig
-- Never edit or delete this file (AGENTS.md)
+- Never edit or delete this file (@[AGENTS.md])
 - Never delete files in the @[plans/] directory
 - Additional files are welcome if it aids clean separation
 - Avoid nulls where possible
@@ -44,7 +46,7 @@
 
 ### Strings
 
-- User facing strings should be added to src/main/resources/messages/ReviewBundle.properties
+- User facing strings should be added to @[src/main/resources/messages/ReviewBundle.properties]
 
 ### Newlines and spacing
 
@@ -73,3 +75,8 @@
 - Use XML files as virtual files for testing with inline XML snippets in test code
 - Only check logic in UI tests, not static UI construction
 - Use parameterized tests when multiple test methods share identical setup, execution, and assertions with only input values differing.
+
+## GitHub Actions
+
+GitHub actions are @[.github/workflows/] directory
+Validate GitHub actions using running `actionlint`. Ensure any validation errors or warnings are fixed.

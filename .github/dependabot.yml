@@ -11,8 +11,8 @@ updates:
     groups:
       junit-dependencies:
         update-types:
-          - minor
-          - patch
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
         patterns:
           - "org.junit.jupiter:*"
           - "org.junit.platform:*"
