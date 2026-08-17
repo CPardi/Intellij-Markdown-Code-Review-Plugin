@@ -1,28 +1,26 @@
-# Dependabot configuration:
-# https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/configuration-options-for-dependency-updates
-
 version: 2
 updates:
-  # Maintain dependencies for Gradle dependencies
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
     groups:
       junit-dependencies:
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
         patterns:
-          - "org.junit.jupiter:*"
-          - "org.junit.platform:*"
-          - "org.junit.vintage:*"
+          - "org.junit.*"
           - "junit:junit"
           - "org.opentest4j:*"
       gradle-dependencies:
         patterns:
           - "*"
-  # Maintain dependencies for GitHub Actions
+    ignore:
+      - dependency-name: "org.junit.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "junit:junit"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
