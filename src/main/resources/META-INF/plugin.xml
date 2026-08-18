@@ -40,25 +40,25 @@
             <action id="ReviewMarkdownGenerator.AddCommentContextMenu"
                     class="com.github.cpardi.markdowncodereview.actions.AddCommentContextMenuAction"
                     text="Add Comment">
-              <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl K" second-keystroke="J"/>
-              <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta K" second-keystroke="J"/>
-              <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta K" second-keystroke="J"/>
+              <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl J" second-keystroke="J"/>
+              <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta J" second-keystroke="J"/>
+              <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta J" second-keystroke="J"/>
             </action>
 
             <action id="ReviewMarkdownGenerator.AddOrEditComment"
                     class="com.github.cpardi.markdowncodereview.actions.AddOrEditCommentAction"
                     text="Add or Edit Comment">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl K" second-keystroke="K"/>
-                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta K" second-keystroke="K"/>
-                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta K" second-keystroke="K"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl J" second-keystroke="K"/>
+                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta J" second-keystroke="K"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta J" second-keystroke="K"/>
             </action>
 
             <action id="ReviewMarkdownGenerator.AddPageComment"
                     class="com.github.cpardi.markdowncodereview.actions.AddPageCommentAction"
                     text="Add Page Comment">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl K" second-keystroke="L"/>
-                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta K" second-keystroke="L"/>
-                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta K" second-keystroke="L"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl J" second-keystroke="L"/>
+                <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt meta J" second-keystroke="L"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt meta J" second-keystroke="L"/>
             </action>
 
             <separator/>
