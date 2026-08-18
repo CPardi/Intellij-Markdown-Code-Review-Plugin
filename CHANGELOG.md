@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# intellij-review-markdown-generator Changelog
+# IntelliJ Markdown Code Review Plugin Changelog
 
 ## [Unreleased]
 ### Added
