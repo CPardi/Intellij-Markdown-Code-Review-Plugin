@@ -36,7 +36,7 @@ _A new review will be created automatically if you add a comment when no review 
 Line comments attach to specific lines of code and track the text as it moves during editing.
 
 - **Context Menu**: Right-click in the editor → **Review** → **Add Comment**
-- **Keyboard Shortcut**: Ctrl+Alt+K then J
+- **Keyboard Shortcut**: Ctrl+Alt+J then J
 
 Example line comment output:
 
@@ -51,7 +51,7 @@ This function could be refactored into smaller methods
 Page comments apply to an entire file rather than specific lines and don't track line numbers. These may be added using the methods below.
 
 - **Context Menu**: Right-click in the editor → **Review** → **Add Page Comment**
-- **Keyboard Shortcut**: Ctrl+Alt+K then L
+- **Keyboard Shortcut**: Ctrl+Alt+J then L
 
 Example page comment output:
 
@@ -68,7 +68,7 @@ This file needs better documentation
 Existing comments are visible from their line highlighting and gutter icon. Comments may be edited using the methods below.
 
 - **Gutter Icon**: Click the gutter icon on any line with an existing comment to edit it
-- **Keyboard Shortcut**: Place the cursor on a line with a comment and type Ctrl+Alt+K then K
+- **Keyboard Shortcut**: Place the cursor on a line with a comment and type Ctrl+Alt+J then K
 - **Tool Window**: Select a comment in the **Review Output** tool window and click **Edit**
 
 ### Deleting Comments
