@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Removed
+
+- Support for IntelliJ builds before 253
+
 ## [0.0.1] - 2026-08-18
 
 ### Added
