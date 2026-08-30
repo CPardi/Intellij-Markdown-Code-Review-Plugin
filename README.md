@@ -1,8 +1,8 @@
 # IntelliJ Markdown Code Review Plugin
 
 ![Build](https://github.com/CPardi/Intellij-Markdown-Code-Review-Plugin/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/33709-markdown-code-review.svg)](https://plugins.jetbrains.com/plugin/33709-markdown-code-review)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/33709-markdown-code-review.svg)](https://plugins.jetbrains.com/plugin/33709-markdown-code-review)
 
 ![demo.gif](graphics/demo.gif)
 
@@ -102,9 +102,9 @@ Move this line to the next paragraph
 
 - Using JetBrains Marketplace:
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
+  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/33709-markdown-code-review) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from JetBrains Marketplace and install it manually using
+  You can also download the [latest release](https://plugins.jetbrains.com/plugin/33709-markdown-code-review/versions) from JetBrains Marketplace and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 - Manually:
