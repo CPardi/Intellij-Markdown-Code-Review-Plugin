@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 buildscript {
     dependencies {
-        classpath("org.commonmark:commonmark:0.30.0")
+        classpath("org.commonmark:commonmark:0.30.1")
     }
 }
 
